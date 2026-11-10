@@ -469,6 +469,31 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .countBox{display:flex;gap:8px;align-items:stretch;margin-top:10px}
 .countBox .field{flex:1}
 .countBox button{flex:none}
+.metric.race{display:flex;flex-direction:column;align-items:stretch;justify-content:stretch;gap:6px;padding:12px 12px 10px;text-align:left}
+.raceHead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.raceHead > div:first-child{flex:1;min-width:0}
+.raceHead .label{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.raceHead .val{justify-content:flex-start}
+.metric.race .num{font-size:clamp(44px,13vw,72px)}
+.metric.race.ahead .num{color:var(--ok)}
+.metric.race.behind .num{color:var(--warn)}
+.raceSide{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font:500 14px var(--mono);color:var(--muted);text-align:right;max-width:48%}
+.metric.race.ahead .rs2{color:var(--ok)}
+.metric.race.behind .rs2{color:var(--warn)}
+.rs2{font:600 13px var(--sans, inherit)}
+.raceLane{flex:1;min-height:160px;border-radius:12px;overflow:hidden;background:linear-gradient(color-mix(in srgb,var(--water) 14%,var(--bg)),color-mix(in srgb,var(--water) 6%,var(--bg)))}
+.raceLane canvas{display:block;width:100%;height:100%}
+.raceFoot{display:flex;justify-content:space-between;gap:10px;font:500 12px var(--mono);color:var(--muted);white-space:nowrap}
+.raceFoot .rf1{flex:none}
+.raceFoot .rf2{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oppGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.oppBtn{display:flex;align-items:center;gap:8px;text-align:left;padding:8px 10px;font-size:13px;line-height:1.2}
+.oppBtn[aria-pressed="true"]{border-color:var(--water);background:color-mix(in srgb,var(--water) 18%,var(--panel))}
+.oppI{font-size:22px;flex:none}
+.raceSpark{display:block;width:100%;max-width:260px;height:auto;margin-top:6px}
+.rsZero{stroke:var(--line);stroke-width:1}
+.rsUp,.rsDn{fill:none;stroke-width:2;stroke-linejoin:round}
+.rsUp{stroke:var(--ok)} .rsDn{stroke:var(--warn)}
 </style>
 </head>
 <body>
@@ -580,7 +605,10 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 
     <section data-tab="game" hidden>
       <h3>Geisterboot</h3>
-      <label class="toggle" for="ghostOn"><input type="checkbox" id="ghostOn"><span>Geisterboot beim Rudern anzeigen</span></label>
+      <label class="toggle" for="ghostOn"><input type="checkbox" id="ghostOn"><span>Geisterboot als Rennbahn anzeigen</span></label>
+      <p class="note left" style="margin:8px 0 0">Wähle deinen Gegner:</p>
+      <div class="oppGrid" id="oppList" role="group" aria-label="Gegner"></div>
+      <p class="note left" id="oppIntro"></p>
       <div class="seg" id="ghostMode" role="group" aria-label="Tempo des Geisterboots" style="grid-template-columns:1fr 1fr">
         <button type="button" data-g="pb" aria-pressed="false">Meine Bestzeit</button>
         <button type="button" data-g="custom" aria-pressed="false">Eigenes Tempo</button>
@@ -5044,6 +5072,247 @@ $('countIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('countB
 const _restartLogC = restartLog;
 restartLog = () => { countEntries = []; $('dCounted').textContent = '–'; _restartLogC(); };
 $('logRestart').onclick = () => restartLog();
+
+// =====================================================================
+// Geisterboot als Rennbahn mit 10 Gegnern
+// =====================================================================
+const OPPS = [
+  {id: 'hollaender', nom: 'Der Fliegende Holländer', dat: 'dem Fliegenden Holländer', acc: 'den Fliegenden Holländer', short: 'Holländer', icon: '👻', hull: '#cfd8ff', glow: '#a9b8ff', deco: 'sail',
+   intro: 'Seit 400 Jahren verdammt, über die Meere zu segeln. Heute reichen ihm 1.000 m.',
+   passed: 'Der Holländer heult in den Nebel: „Das war nur ein Windstoß!“', passes: '„Seit 400 Jahren auf See, Landratte. Versuch’s weiter!“', closing: 'Ein kalter Hauch im Nacken: Der Holländer kommt näher!'},
+  {id: 'nebelbart', nom: 'Käpt’n Nebelbart', dat: 'Käpt’n Nebelbart', acc: 'Käpt’n Nebelbart', short: 'Nebelbart', icon: '🧔', hull: '#9fb4b8', glow: '#d9e4e6', deco: 'fog', rider: '🧔',
+   intro: 'Ein grummeliger Geisterkapitän, der aus dem Dunst auftaucht, wenn du nachlässt.',
+   passed: '„Bei meinem Bart! Wo kommst du denn her?“', passes: '„Hohoho! Mein Bart ist schneller als du!“', closing: 'Nebel zieht auf … Käpt’n Nebelbart ist dicht hinter dir!'},
+  {id: 'auster', nom: 'Die Rostige Auster', dat: 'der Rostigen Auster', acc: 'die Rostige Auster', short: 'Auster', icon: '🦪', hull: '#b5774a', glow: '#e0a070', deco: 'rust', rider: '🦪',
+   intro: 'Ein klappriger Kahn, der trotzdem erstaunlich schnell ist.',
+   passed: 'Quietsch! Die Rostige Auster verliert eine Schraube.', passes: 'Peinlich: Ein rostiger Kahn hat dich gerade überholt.', closing: 'Es quietscht hinter dir. Die Rostige Auster holt auf!'},
+  {id: 'eddie', nom: 'Einbein-Eddie', dat: 'Einbein-Eddie', acc: 'Einbein-Eddie', short: 'Eddie', icon: '🦜', hull: '#6b543c', glow: '#c9a46a', deco: 'flag', rider: '🦜',
+   intro: 'Holzbein, Augenklappe, Papagei. Rudert einarmig, weil er mit dem anderen Arm den Säbel schwenkt.',
+   passed: '„Arrr! Mein Holzbein klemmt!“', passes: 'Der Papagei kräht: „Arrr! Landratte! Landratte!“', closing: 'Säbelrasseln hinter dir: Einbein-Eddie holt auf!'},
+  {id: 'schaluppe', nom: 'Die Spukschaluppe „Schlaflos“', dat: 'der Spukschaluppe „Schlaflos“', acc: 'die Spukschaluppe „Schlaflos“', short: '„Schlaflos“', icon: '🥱', hull: '#7d6fb3', glow: '#b9a8ff', deco: 'none', rider: '🥱',
+   intro: 'Ihre Crew rudert seit 300 Jahren ohne Pause und will nur eins: dass du verlierst.',
+   passed: 'Die Crew gähnt dir hinterher. 300 Jahre ohne Schlaf machen eben müde.', passes: '„Wir schlafen nie. Und du schläfst gerade ein!“', closing: 'Untotes Gähnen hinter dir: Die „Schlaflos“ kommt näher!'},
+  {id: 'lady', nom: 'Lady Kielwasser', dat: 'Lady Kielwasser', acc: 'Lady Kielwasser', short: 'Lady Kielwasser', icon: '👒', hull: '#e7b6d0', glow: '#ffd3ea', deco: 'none', rider: '👒',
+   intro: 'Eine elegante Geister-Regattaruderin mit Federhut, die nie ins Schwitzen kommt.',
+   passed: '„Wie unschicklich! Sie haben mich nass gespritzt!“', passes: '„Verzeihung, darf ich? Danke sehr.“ Lady Kielwasser gleitet vorbei.', closing: 'Ein Federhut taucht neben dir auf: Lady Kielwasser holt auf!'},
+  {id: 'unsichtbar', nom: 'Der Unsichtbare Ruderer', dat: 'dem Unsichtbaren Ruderer', acc: 'den Unsichtbaren Ruderer', short: 'Unsichtbarer', icon: '🫥', hull: '#e8f3f2', glow: '#e8f3f2', deco: 'invisible',
+   intro: 'Man sieht nur zwei Ruder, die sich von selbst bewegen. Wer drinsitzt, weiß niemand.',
+   passed: 'Zwei Ruder bleiben verdutzt in der Luft stehen.', passes: 'Du hörst nur ein Plätschern … und schon ist er vorbei.', closing: 'Platsch, platsch … die Ruder ohne Ruderer kommen näher!'},
+  {id: 'manfred', nom: 'Möwe Manfred', dat: 'Möwe Manfred', acc: 'Möwe Manfred', short: 'Manfred', icon: '🐦', deco: 'bird',
+   intro: 'Kein Boot, sondern eine Möwe, die dich in Ruderhöhe verfolgt und schadenfroh kreischt.',
+   passed: 'Manfred kreischt beleidigt und frisst vor Frust eine Pommes.', passes: '„Kräh! Zu langsam! Kräh!“', closing: 'Flügelschlagen hinter dir: Manfred will deine Pommes!'},
+  {id: 'badewanne', nom: 'Die Badewanne des Grauens', dat: 'der Badewanne des Grauens', acc: 'die Badewanne des Grauens', short: 'Badewanne', icon: '🛁', deco: 'tub',
+   intro: 'Ein Geist in einer alten Emaille-Wanne, mit Klobürste als Ruder. Gegen ihn zu verlieren, tut besonders weh.',
+   passed: 'Blubb. Die Badewanne läuft voll.', passes: '„Platsch!“ Eine Badewanne überholt dich. Mit Klobürste.', closing: 'Ein Quietscheentchen nähert sich … die Badewanne holt auf!'},
+  {id: 'smutje', nom: 'Smutje Sauerteig', dat: 'Smutje Sauerteig', acc: 'Smutje Sauerteig', short: 'Smutje', icon: '🧑‍🍳', hull: '#c99a5b', glow: '#ffd08a', deco: 'none', rider: '🧑‍🍳',
+   intro: 'Der Schiffskoch des Holländers. Rudert mit dem Kochlöffel und ruft, das Essen werde kalt.',
+   passed: '„Hey, wart auf mich! Die Suppe kocht über!“', passes: '„Das Essen wird kalt, Ruderer!“', closing: 'Es riecht nach Eintopf: Smutje Sauerteig ist dicht hinter dir!'}
+];
+const oppOf = () => OPPS.find(o => o.id === ghostCfg.opp) || OPPS[0];
+const capFirst = t => t.charAt(0).toUpperCase() + t.slice(1);
+
+// ---------- Rennen verfolgen: Abstand, Überholen, Endspurt ----------
+function raceStep(){
+  if (!prefs.on.includes('ghost') || !s.firstStroke || s.ghostD == null) return;
+  const R = s.race || (s.race = {log: [], hist: [], lead: null, armed: false, sprint: false, changes: 0, maxLead: 0, maxBack: 0});
+  const gap = (s.distShown || 0) - s.ghostD, t = s.activeMs, O = oppOf();
+  R.gap = gap; R.maxLead = Math.max(R.maxLead, gap); R.maxBack = Math.min(R.maxBack, gap);
+  if (!R.hist.length || t - R.hist[R.hist.length - 1][0] >= 500) R.hist.push([t, gap]);
+  while (R.hist.length > 2 && t - R.hist[0][0] > 10000) R.hist.shift();
+  if (!R.log.length || t - R.log[R.log.length - 1][0] >= 5000) R.log.push([t, Math.round(gap * 10) / 10]);
+  // Führungswechsel mit 2 m Spielraum, damit es nicht flackert
+  if (R.lead !== true && gap > 2){ if (R.lead === false){ R.changes++; msg('Überholt! ' + O.passed); whistle(); buzz([80, 50, 80]); } R.lead = true; R.armed = false; }
+  else if (R.lead !== false && gap < -2){ if (R.lead === true){ R.changes++; msg(capFirst(O.nom) + ' zieht vorbei. ' + O.passes); buzz(300); } R.lead = false; }
+  if (R.lead === true){ if (gap > 12) R.armed = true; else if (R.armed && gap < 5 && t - (R.closeT || -1e9) > 60000){ R.armed = false; R.closeT = t; msg(O.closing); buzz([60, 60, 60]); } }
+  if (goal && goal.type === 'd' && !R.sprint){ const rest = goal.value - (s.distShown || 0); if (rest <= 100 && rest > 0){ R.sprint = true; msg('Endspurt! Noch ' + Math.round(rest) + ' m bis zum Ziel.'); whistle(); } }
+}
+const _drawFrameR2 = drawFrame;
+drawFrame = () => { _drawFrameR2(); try{ raceStep(); }catch(err){ lastError = 'Rennen: ' + err.message; } };
+
+// ---------- Zeichnen ----------
+function hullPath(g, L, W){
+  g.beginPath(); g.moveTo(0, -L / 2);
+  g.bezierCurveTo(W * 0.62, -L * 0.22, W * 0.52, L * 0.22, W * 0.36, L / 2);
+  g.lineTo(-W * 0.36, L / 2);
+  g.bezierCurveTo(-W * 0.52, L * 0.22, -W * 0.62, -L * 0.22, 0, -L / 2); g.closePath();
+}
+function oars(g, L, W, ph, col, one){
+  const a = Math.sin(ph * TAU) * 0.55, len = W * 1.9;
+  g.strokeStyle = col; g.lineWidth = 2.5; g.lineCap = 'round';
+  [1, -1].forEach(side => {
+    if (one && side < 0) return;
+    const ang = side * (Math.PI / 2) + side * a * -1, x = Math.cos(ang) * len, y = Math.sin(ang) * len * 0.6 + L * 0.02;
+    g.beginPath(); g.moveTo(0, L * 0.02); g.lineTo(x, y); g.stroke();
+    g.beginPath(); g.ellipse(x, y, 5, 9, ang, 0, TAU); g.fillStyle = col; g.fill();
+  });
+}
+function emoji(g, ch, size, x = 0, y = 0){ g.font = size + 'px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ch, x, y); }
+function drawOpp(g, O, L, t, ph){
+  const W = L * 0.36;
+  g.save(); g.globalAlpha = 0.8; g.shadowColor = O.glow || '#ffffff'; g.shadowBlur = 14;
+  if (O.deco === 'bird'){
+    const f = Math.sin(t / 140) * 0.35;
+    g.save(); g.scale(1, 1 - Math.abs(f) * 0.4); emoji(g, '🐦', L * 0.62); g.restore();
+    g.restore(); return;
+  }
+  if (O.deco === 'tub'){ emoji(g, '🛁', L * 0.66); g.shadowBlur = 0; oars(g, L * 0.8, W, ph, '#8fb0b2', true); g.restore(); return; }
+  if (O.deco === 'invisible'){ g.setLineDash([4, 6]); g.strokeStyle = 'rgba(232,243,242,.35)'; g.lineWidth = 1.5; hullPath(g, L, W); g.stroke(); g.setLineDash([]); oars(g, L, W, ph, '#e8f3f2'); g.restore(); return; }
+  oars(g, L, W, ph, '#e8f3f2');
+  hullPath(g, L, W); g.fillStyle = O.hull; g.fill(); g.shadowBlur = 0;
+  if (O.deco === 'sail'){ g.globalAlpha = 0.55; g.beginPath(); g.moveTo(-W * 1.1, -L * 0.12); g.lineTo(W * 1.1, -L * 0.12); g.lineTo(W * 1.0, L * 0.04); g.lineTo(W * 0.6, -L * 0.01); g.lineTo(W * 0.3, L * 0.06); g.lineTo(0, -L * 0.02); g.lineTo(-W * 0.4, L * 0.07); g.lineTo(-W * 0.7, 0); g.lineTo(-W * 1.0, L * 0.05); g.closePath(); g.fillStyle = '#eef1ff'; g.fill(); g.globalAlpha = 0.8; }
+  if (O.deco === 'fog'){ g.fillStyle = 'rgba(255,255,255,.18)'; [[-W, L * 0.3, 14], [W * 0.9, -L * 0.1, 12], [-W * 0.6, -L * 0.35, 10], [W * 0.5, L * 0.42, 13]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x + Math.sin(t / 900 + x) * 4, y, r, 0, TAU); g.fill(); }); }
+  if (O.deco === 'rust'){ g.fillStyle = '#7a4527'; [[-W * 0.2, -L * 0.2, 4], [W * 0.15, L * 0.15, 5], [-W * 0.15, L * 0.32, 3]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); }); }
+  if (O.deco === 'flag') emoji(g, '🏴‍☠️', L * 0.22, 0, -L * 0.36);
+  if (O.rider) emoji(g, O.rider, L * 0.3, 0, L * 0.04);
+  g.restore();
+}
+function drawMe(g, L, ph){
+  const W = L * 0.36;
+  oars(g, L, W, ph, '#e8f3f2');
+  hullPath(g, L, W); g.fillStyle = getComputedStyle(document.body).getPropertyValue('--water').trim() || '#3fc4c9'; g.fill();
+  g.beginPath(); g.arc(0, L * 0.04, W * 0.42, 0, TAU); g.fillStyle = '#f2b24c'; g.fill();
+}
+const rHash = k => { let x = Math.imul(k ^ 0x9e3779b9, 0x85ebca6b); x ^= x >>> 13; x = Math.imul(x, 0xc2b2ae35); return ((x ^ (x >>> 16)) >>> 0) / 4294967296; };
+function renderRace(m){
+  const O = oppOf(), c = m.canvas, box = c.parentNode, dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)){ c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  const started = s.firstStroke && s.ghostD != null, my = s.distShown || 0, gd = started ? s.ghostD : 0, gap = my - gd, t = performance.now();
+  // Maßstab: Abstand passt mit etwas Luft ins Bild, wechselt sanft
+  const want = Math.max(40, Math.min(180, Math.abs(gap) * 1.5 + 30));
+  s.raceSpan = s.raceSpan ? s.raceSpan + (want - s.raceSpan) * 0.04 : want;
+  const ppm = H / s.raceSpan, yMe = H * (gap < 0 ? 0.7 : 0.4), xMe = W * 0.32, xG = W * 0.68, L = Math.min(72, H * 0.2);
+  const yOf = d => yMe - (d - my) * ppm, css = getComputedStyle(document.body);
+  const mut = css.getPropertyValue('--muted').trim() || '#8fb0b2', fg = css.getPropertyValue('--fg').trim() || '#e8f3f2', water = css.getPropertyValue('--water').trim() || '#3fc4c9';
+  // Wasser: kleine Wellen, die mit dir vorbeiziehen
+  g.strokeStyle = water; g.globalAlpha = 0.22; g.lineWidth = 2; g.lineCap = 'round';
+  const d0 = my - (H - yMe) / ppm, d1 = my + yMe / ppm;
+  for (let k = Math.floor(d0 / 6); k <= d1 / 6; k++){ const x = rHash(k) * W, y = yOf(k * 6 + rHash(k + 77) * 6); g.beginPath(); g.moveTo(x - 9, y); g.quadraticCurveTo(x, y - 6, x + 9, y); g.stroke(); }
+  g.globalAlpha = 1;
+  // Bojen alle 25 m, Linie und Beschriftung alle 100 m
+  for (let d = Math.ceil(d0 / 25) * 25 || 0; d <= d1; d += 25){
+    const y = yOf(d);
+    if (d % 100 === 0 && d >= 0){ g.strokeStyle = fg; g.globalAlpha = 0.12; g.beginPath(); g.moveTo(8, y); g.lineTo(W - 8, y); g.stroke(); g.globalAlpha = 0.6; g.fillStyle = fg; g.font = '11px "IBM Plex Mono",monospace'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(fmtDist(d) + ' m', 10, y - 3); g.globalAlpha = 1; }
+    if (d >= 0){ g.fillStyle = '#f2b24c'; g.beginPath(); g.arc(W / 2, y, d % 100 === 0 ? 4 : 2.5, 0, TAU); g.fill(); }
+  }
+  // Ruderphase aus Schlagzahl
+  const spm = s.spmShown || 0, phMe = spm ? ((t / 1000) * spm / 60) % 1 : 0.25, phG = started ? ((t / 1000) * 20 / 60 + 0.3) % 1 : 0.25;
+  // Kielwasser
+  g.strokeStyle = fg; g.globalAlpha = 0.15; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(xMe - 6, yMe + L / 2); g.lineTo(xMe - 26, H); g.moveTo(xMe + 6, yMe + L / 2); g.lineTo(xMe + 26, H); g.stroke(); g.globalAlpha = 1;
+  // Gegner (oder Pfeil am Rand, wenn er aus dem Bild ist)
+  const yG = yOf(gd);
+  if (yG < -L * 0.4 || yG > H + L * 0.4){
+    const top = yG < 0, ya = top ? 18 : H - 18;
+    g.fillStyle = O.glow || fg; g.beginPath();
+    if (top){ g.moveTo(xG, ya - 10); g.lineTo(xG - 9, ya + 4); g.lineTo(xG + 9, ya + 4); } else { g.moveTo(xG, ya + 10); g.lineTo(xG - 9, ya - 4); g.lineTo(xG + 9, ya - 4); }
+    g.fill(); g.font = '600 12px "IBM Plex Sans",sans-serif'; g.textAlign = 'center'; g.textBaseline = top ? 'top' : 'bottom'; g.fillStyle = fg;
+    g.fillText(O.short + ' ' + Math.round(Math.abs(gap)) + ' m ' + (top ? 'vorn' : 'hinten'), xG, top ? ya + 8 : ya - 8);
+  } else {
+    g.save(); g.translate(xG, yG); drawOpp(g, O, L, t, phG); g.restore();
+    g.font = '600 12px "IBM Plex Sans",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = fg; g.globalAlpha = 0.85; g.fillText(O.short, xG, yG + L / 2 + 6); g.globalAlpha = 1;
+    // Abstandsklammer
+    if (started && Math.abs(gap) >= 1){
+      const col = gap >= 0 ? (css.getPropertyValue('--ok').trim() || '#5be3a0') : (css.getPropertyValue('--warn').trim() || '#ff8a7a'), xb = W / 2 + 18;
+      g.strokeStyle = col; g.lineWidth = 2; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(W / 2 + 6, yMe); g.lineTo(xb, yMe); g.lineTo(xb, yG); g.lineTo(W / 2 + 6, yG); g.stroke(); g.setLineDash([]);
+      g.fillStyle = col; g.font = '500 12px "IBM Plex Mono",monospace'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(Math.round(Math.abs(gap)) + ' m', xb + 6, (yMe + yG) / 2);
+    }
+  }
+  g.save(); g.translate(xMe, yMe); drawMe(g, L, phMe); g.restore();
+  g.font = '600 12px "IBM Plex Sans",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = fg; g.fillText('Du', xMe, yMe + L / 2 + 6);
+  // Kopfzeile und Fußzeile
+  const R = s.race, base = ghostBasePace();
+  let label, num, unit = 'm', side = '', trend = '', cls = '';
+  if (!started){ label = 'Gegner: ' + O.short; num = '±0'; side = 'Start mit deinem ersten Schlag'; }
+  else {
+    label = (gap >= 0 ? 'Vor ' : 'Hinter ') + O.dat; num = (gap >= 0 ? '+' : '−') + Math.abs(Math.round(gap)); cls = gap >= 0 ? 'ahead' : 'behind';
+    const vG = 500 / (base / ghostFactor(s.activeMs / 1000)), vM = s.speed > 0.3 ? s.speed : vG, sec = Math.abs(gap) / ((vG + vM) / 2);
+    side = (gap >= 0 ? '+' : '−') + sec.toFixed(1).replace('.', ',') + ' s';
+    if (R && R.hist.length > 4){ const d = gap - R.hist[0][1]; trend = Math.abs(d) < 1 ? '= gleichauf im Trend' : (d > 0 ? '▲ ' + (gap >= 0 ? 'du baust aus' : 'du holst auf') : '▼ ' + (gap >= 0 ? 'er holt auf' : 'er zieht davon')); }
+  }
+  put(m.label, 'textContent', label); put(m.num, 'textContent', num); put(m.unit, 'textContent', unit);
+  put(m.side, 'textContent', side); put(m.trend, 'textContent', trend);
+  m.el.classList.toggle('ahead', cls === 'ahead'); m.el.classList.toggle('behind', cls === 'behind');
+  const rest = goal && goal.type === 'd' ? Math.max(0, goal.value - my) : null;
+  put(m.foot1, 'textContent', (started ? O.short + ' ' + fmtPace(base / ghostFactor(s.activeMs / 1000)) : O.short + ' Ø ' + fmtPace(base)) + ' /500');
+  put(m.foot2, 'textContent', rest != null ? 'noch ' + fmtDist(Math.round(rest)) + ' m bis zum Ziel' : '');
+}
+
+// ---------- Bildschirm: Rennbahn bekommt einen eigenen Bildschirm ----------
+const _buildScreensR = buildScreens;
+buildScreens = () => {
+  _buildScreensR();
+  const ids = visibleIds();
+  if (!ids.includes('ghost')) return;
+  // Neu gruppieren: Geisterboot allein, der Rest paarweise
+  const pager = $('pager'), old = mounted.slice(); pager.textContent = ''; mounted = [];
+  const groups = []; let buf = [];
+  ids.forEach(id => { if (id === 'ghost'){ if (buf.length) groups.push(buf), buf = []; groups.push(['ghost']); } else { buf.push(id); if (buf.length === 2) groups.push(buf), buf = []; } });
+  if (buf.length) groups.push(buf);
+  groups.forEach((grp, si) => {
+    const sc = document.createElement('section'); sc.className = 'screen'; sc.style.setProperty('--rows', grp.length);
+    sc.setAttribute('aria-label', 'Bildschirm ' + (si + 1) + ' von ' + groups.length);
+    grp.forEach(id => {
+      if (id === 'ghost'){
+        const el = document.createElement('div'); el.className = 'metric race';
+        el.innerHTML = '<div class="raceHead"><div><span class="label"></span><div class="val"><span class="num">–</span><span class="unit"></span></div></div><div class="raceSide"><span class="rs1"></span><span class="rs2"></span></div></div>' +
+          '<div class="raceLane"><canvas aria-label="Rennbahn mit deinem Boot und dem Geisterboot"></canvas></div><div class="raceFoot"><span class="rf1"></span><span class="rf2"></span></div>';
+        sc.appendChild(el);
+        mounted.push({id, el, race: true, label: el.querySelector('.label'), num: el.querySelector('.num'), unit: el.querySelector('.unit'), side: el.querySelector('.rs1'), trend: el.querySelector('.rs2'),
+          sub: document.createElement('span'), canvas: el.querySelector('canvas'), foot1: el.querySelector('.rf1'), foot2: el.querySelector('.rf2')});
+      } else {
+        const keep = old.find(m => m.id === id); sc.appendChild(keep.el); mounted.push(keep);
+      }
+    });
+    pager.appendChild(sc);
+  });
+  const dots = $('dots'); dots.textContent = '';
+  if (groups.length > 1) groups.forEach((_, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Bildschirm ' + (i + 1)); b.onclick = () => goTo(i); dots.appendChild(b); });
+  page = Math.min(page, Math.max(0, groups.length - 1)); pager.scrollLeft = page * pager.clientWidth; markDot();
+};
+const _renderMetricsR = renderMetrics;
+renderMetrics = V => { _renderMetricsR(V); for (const m of mounted) if (m.race){ try{ renderRace(m); }catch(err){ lastError = 'Rennbahn: ' + err.message; } } };
+
+// ---------- Ergebnis nach der Einheit ----------
+const _extraSnapR = extraSnap;
+extraSnap = () => {
+  const o = _extraSnapR(), R = s.race;
+  if (R && R.log.length >= 2){
+    let pts = R.log.map(p => p[1]).concat(Math.round(R.gap * 10) / 10); while (pts.length > 120) pts = pts.filter((_, i) => i % 2 === 0);
+    o.race = {opp: oppOf().id, gap: Math.round(R.gap), changes: R.changes, maxLead: Math.round(R.maxLead), maxBack: Math.round(R.maxBack), pts};
+  }
+  return o;
+};
+function raceSpark(r){
+  const W = 240, H = 56, pts = r.pts, mx = Math.max(5, ...pts.map(Math.abs)), y = v => H / 2 - v / mx * (H / 2 - 4), x = i => i / Math.max(1, pts.length - 1) * W;
+  const line = pts.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join('');
+  return '<svg class="raceSpark" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Abstand zum Gegner im Verlauf">' +
+    '<clipPath id="rsUp"><rect width="' + W + '" height="' + H / 2 + '"/></clipPath><clipPath id="rsDn"><rect y="' + H / 2 + '" width="' + W + '" height="' + H / 2 + '"/></clipPath>' +
+    '<line x1="0" x2="' + W + '" y1="' + H / 2 + '" y2="' + H / 2 + '" class="rsZero"/>' +
+    '<path d="' + line + '" class="rsUp" clip-path="url(#rsUp)"/><path d="' + line + '" class="rsDn" clip-path="url(#rsDn)"/></svg>';
+}
+const _extraAfterR = extraAfter;
+extraAfter = (x, before, R, EX) => {
+  const ev = _extraAfterR(x, before, R, EX);
+  if (x.race){
+    const O = OPPS.find(o => o.id === x.race.opp) || OPPS[0], g = x.race.gap;
+    const head = g > 0 ? '<b>Gewonnen gegen ' + O.acc + '</b> mit ' + g + ' m Vorsprung!' : g < 0 ? '<b>' + capFirst(O.nom) + ' war ' + -g + ' m vorn.</b> Beim nächsten Mal!' : '<b>Unentschieden</b> gegen ' + O.acc + '!';
+    ev.unshift([O.icon, head + (x.race.changes ? ' ' + x.race.changes + (x.race.changes === 1 ? ' Führungswechsel.' : ' Führungswechsel.') : '') + raceSpark(x.race)]);
+  }
+  return ev;
+};
+
+// ---------- Einstellungen: Gegner wählen ----------
+function renderOpps(){
+  const cur = oppOf().id;
+  $('oppList').innerHTML = OPPS.map(o => '<button type="button" class="oppBtn" data-opp="' + o.id + '" aria-pressed="' + (o.id === cur) + '"><span class="oppI" aria-hidden="true">' + o.icon + '</span><span class="oppN">' + o.nom + '</span></button>').join('');
+  $('oppIntro').textContent = oppOf().intro;
+}
+$('oppList').onclick = e => { const b = e.target.closest('[data-opp]'); if (!b) return; ghostCfg.opp = b.dataset.opp; store('ruderGhost', ghostCfg); renderOpps(); };
+const _renderTrainingR = renderTraining;
+renderTraining = () => { _renderTrainingR(); try{ renderOpps(); }catch(_){} };
+renderOpps();
 
 const _resetSessionB = resetSession;
 resetSession = () => { _resetSessionB(); activeBoss = null; renderBossBar(); };

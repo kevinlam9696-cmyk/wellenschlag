@@ -494,6 +494,63 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .rsZero{stroke:var(--line);stroke-width:1}
 .rsUp,.rsDn{fill:none;stroke-width:2;stroke-linejoin:round}
 .rsUp{stroke:var(--ok)} .rsDn{stroke:var(--warn)}
+.profSaved{font-weight:600;color:var(--fg)}
+.bpLegend{display:flex;gap:14px;flex-wrap:wrap;margin:-4px 0 0;font-size:12px;color:var(--muted)}
+.bpLegend span{display:flex;align-items:center;gap:5px}
+.bpLegend i{display:inline-block;width:18px;height:8px;border-radius:3px}
+.lgB{background:var(--wood)} .lgM{background:var(--wood);opacity:.55} .lgG{border:1.5px dashed var(--muted);opacity:.7}
+.bpBar{height:5px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+.bpBar i{display:block;height:100%;background:var(--water);border-radius:3px}
+.bpTxt{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.bpGrow{animation:bpIn .6s ease-out}
+@keyframes bpIn{from{opacity:0}to{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.bpGrow{animation:none}}
+/* Geisterrennen 2 */
+.raceWin{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(3px)}
+.raceWin[hidden]{display:none}
+#rwConfetti{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.rwCard{position:relative;max-width:360px;width:100%;background:var(--panel);border:2px solid var(--gold);border-radius:20px;padding:24px 20px 20px;text-align:center;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.35);animation:rwPop .5s cubic-bezier(.2,1.4,.4,1)}
+.rwCup{font-size:72px;line-height:1;animation:rwBob 1.6s ease-in-out infinite}
+.rwCard h2{margin:0;font:700 34px/1 var(--num);letter-spacing:.04em;text-transform:uppercase;color:var(--gold)}
+.rwSub{margin:0;font-size:16px}
+.rwStats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0}
+.rwStats div{border:1px solid var(--line);border-radius:12px;padding:8px 6px;display:flex;flex-direction:column}
+.rwStats b{font:600 22px var(--num);font-variant-numeric:tabular-nums}
+.rwStats span{font-size:12px;color:var(--muted)}
+.rwQuote{margin:0;font-style:italic;color:var(--muted)}
+#rwBadges:empty{display:none}
+#rwBadges{font-size:14px;color:var(--gold);font-weight:600}
+@keyframes rwPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes rwBob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.rwCard,.rwCup{animation:none}}
+/* Neue Ordnung */
+:root{--navH:64px}
+.app{padding-bottom:calc(var(--navH) + 10px + env(safe-area-inset-bottom,0px))}
+.sheet{padding-bottom:calc(var(--navH) + env(safe-area-inset-bottom,0px))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);
+  height:calc(var(--navH) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);
+  background:var(--panel);border-top:1px solid var(--line)}
+.tabbar button{border:0;border-radius:0;background:none;padding:6px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font:600 11px var(--ui);color:var(--muted)}
+.tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabbar button[aria-current]{color:var(--water)}
+.tabbar button[aria-current] svg{stroke-width:2.3}
+.iconBtn{width:38px;height:38px;padding:0;border-radius:50%;display:grid;place-items:center;flex:none}
+.iconBtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.tCards,.setGroups{display:flex;flex-direction:column;gap:8px}
+.tCard{border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.tCard > summary{list-style:none;display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer}
+.tCard > summary::-webkit-details-marker{display:none}
+.tI{font-size:26px;line-height:1;flex:none;width:32px;text-align:center}
+.tT{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tT b{font-size:16px}
+.tS{font-size:13px;color:var(--muted)}
+.tCard.on .tS{color:var(--water);font-weight:600}
+.tA{font-size:22px;color:var(--muted);transition:transform .15s}
+.tCard[open] > summary .tA{transform:rotate(90deg)}
+.tBody{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+.tBody > section{gap:10px}
+.setGroup > summary{padding:14px}
 </style>
 </head>
 <body>
@@ -501,6 +558,7 @@ button.danger{color:var(--warn);border-color:var(--warn)}
   <header>
     <h1><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="wl_g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#15505e"/><stop offset="1" stop-color="#0b1d24"/></linearGradient><linearGradient id="wl_sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16495a"/><stop offset="1" stop-color="#0d2f38"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#wl_g)"/><circle cx="256" cy="256" r="176" fill="#0b1d24" opacity=".35"/><circle cx="256" cy="256" r="172" fill="#e8f3f2"/><circle cx="256" cy="256" r="172" fill="none" stroke="#c9dcdb" stroke-width="6"/><circle cx="400.1" cy="315.7" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="315.7" cy="400.1" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="196.3" cy="400.1" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="111.9" cy="315.7" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="111.9" cy="196.3" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="196.3" cy="111.9" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="315.7" cy="111.9" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="400.1" cy="196.3" r="9" fill="#9fc2c3" stroke="#5f8486" stroke-width="3"/><circle cx="256" cy="256" r="136" fill="#0b2a33"/><clipPath id="wl_pc"><circle cx="256" cy="256" r="132"/></clipPath><g clip-path="url(#wl_pc)"><rect x="120" y="110" width="272" height="300" fill="url(#wl_sky)"/><circle cx="318" cy="196" r="24" fill="#f2b24c"/><path d="M110 268c27 0 40-22 67-22s40 22 67 22 40-22 67-22 40 22 67 22 40-22 67-22V420H110z" fill="#3fc4c9"/><path d="M80 314c27 0 40-18 67-18s40 18 67 18 40-18 67-18 40 18 67 18 40-18 67-18 40 18 67 18V420H80z" fill="#1f97a0"/><path d="M150 186a120 120 0 0 1 70-62" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity=".28"/></g><circle cx="256" cy="256" r="136" fill="none" stroke="#0b1d24" stroke-width="8"/></svg><span>Wellenschlag</span></h1>
     <div class="headRight">
+      <button id="settingsBtn" type="button" aria-haspopup="dialog">Einstellungen</button>
       <div class="status" id="status"><span class="dot"></span><span id="statusText">Nicht verbunden</span></div>
       <button type="button" class="streakChip shellChip" id="shellBtn" aria-label="Werft">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12.5a8.5 8 0 0 1 17 0L15 19.5H9z" fill="currentColor" fill-opacity=".18"/><path d="M12 19.5V5M12 19.5 7.2 6.6M12 19.5l4.8-12.9M12 19.5 4.1 9.6M12 19.5l7.9-9.9M9.5 21.5h5"/></svg>
@@ -525,7 +583,47 @@ button.danger{color:var(--warn);border-color:var(--warn)}
   <div class="actions">
     <button class="primary" id="connectBtn" type="button">Verbinden</button>
     <button id="resetBtn" type="button">Beenden</button>
-    <button id="settingsBtn" type="button" aria-haspopup="dialog">Werte</button>
+  </div>
+</div>
+
+<nav class="tabbar" id="tabbar" aria-label="Bereiche">
+  <button type="button" data-view="row" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 0 3-1.5 4.5-1.5S10 17 12 17s3-1.5 4.5-1.5S19 17 21 17"/><path d="M5 13l9-7M14 6l3.5-2.5M8 13l4 1 5-3"/></svg><span>Rudern</span></button>
+  <button type="button" data-view="train"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>Training</span></button>
+  <button type="button" data-view="log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C6.5 4.3 9 4.3 12 6c3-1.7 5.5-1.7 8-.5V19c-2.5-1.2-5-1.2-8 .5-3-1.7-5.5-1.7-8-.5z"/><path d="M12 6v13.5"/></svg><span>Logbuch</span></button>
+  <button type="button" data-view="ach"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.5 13.2 7 21l5-2.6 5 2.6-1.5-7.8"/></svg><span>Erfolge</span></button>
+</nav>
+
+<div class="sheet" id="trainSheet" role="dialog" aria-modal="true" aria-labelledby="trainTitle" hidden>
+  <div class="sheetInner">
+    <div class="sheetHead">
+      <h2 id="trainTitle">Training</h2>
+      <button class="primary" id="closeTrain" type="button" style="flex:none">Fertig</button>
+    </div>
+    <p class="note left" style="margin:-6px 0 0">Was ruderst du heute? Tippe eine Trainingsart an, stell sie kurz ein und leg los. Mehrere lassen sich kombinieren, zum Beispiel ein Ziel mit einem Rennen.</p>
+    <div class="tCards" id="tCards"></div>
+  </div>
+</div>
+
+<div class="sheet" id="logSheet" role="dialog" aria-modal="true" aria-labelledby="logTitle" hidden>
+  <div class="sheetInner">
+    <div class="sheetHead">
+      <h2 id="logTitle">Logbuch</h2>
+      <button class="primary" id="closeLog" type="button" style="flex:none">Fertig</button>
+    </div>
+    <div id="logBody" style="display:flex;flex-direction:column;gap:18px"></div>
+  </div>
+</div>
+
+<div class="raceWin" id="raceWin" role="dialog" aria-modal="true" aria-labelledby="rwTitle" hidden>
+  <canvas id="rwConfetti" aria-hidden="true"></canvas>
+  <div class="rwCard">
+    <div class="rwCup" aria-hidden="true">🏆</div>
+    <h2 id="rwTitle">Sieg!</h2>
+    <p class="rwSub" id="rwSub"></p>
+    <div class="rwStats" id="rwStats"></div>
+    <p class="rwQuote" id="rwQuote"></p>
+    <div id="rwBadges"></div>
+    <button type="button" class="primary" id="rwClose">Weiter</button>
   </div>
 </div>
 
@@ -578,7 +676,8 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 
     <section data-tab="train" hidden>
       <h3>Profil</h3>
-      <p class="note left">Wird für die Kalorien gebraucht. Bleibt nur auf diesem Gerät gespeichert.</p>
+      <p class="note left">Wird für Kalorien und Pulszonen gebraucht. Die App merkt sich deine Angaben und rechnet so lange damit, bis du etwas Neues einträgst.</p>
+      <p class="note left profSaved" id="profSaved"></p>
       <div class="seg" role="group" aria-label="Geschlecht" id="sexSeg">
         <button type="button" data-s="m" aria-pressed="false">Männlich</button>
         <button type="button" data-s="f" aria-pressed="false">Weiblich</button>
@@ -618,6 +717,16 @@ button.danger{color:var(--warn);border-color:var(--warn)}
         <span class="stepVal" id="ghostPace" aria-live="polite">2:30</span><span class="stepLbl">Ø pro 500 m</span>
         <button type="button" class="stepBtn" id="ghostFaster" aria-label="5 Sekunden schneller">+</button>
       </div>
+      <p class="note left" style="margin:10px 0 0"><b>Renndistanz</b></p>
+      <div class="seg" id="raceDistSeg" role="group" aria-label="Renndistanz" style="grid-template-columns:repeat(5,1fr)">
+        <button type="button" data-rd="500">500</button><button type="button" data-rd="1000">1.000</button><button type="button" data-rd="2000">2.000</button><button type="button" data-rd="5000">5.000</button><button type="button" data-rd="0">Offen</button>
+      </div>
+      <div class="stepRow" id="raceDistBox">
+        <button type="button" class="stepBtn" id="raceDistLess" aria-label="100 m kürzer">−</button>
+        <span class="stepVal" id="raceDistVal" aria-live="polite">1.000</span><span class="stepLbl">Meter</span>
+        <button type="button" class="stepBtn" id="raceDistMore" aria-label="100 m länger">+</button>
+      </div>
+      <p class="note left" id="raceDistNote"></p>
       <p class="note left" id="ghostNote"></p>
     </section>
 
@@ -659,6 +768,12 @@ button.danger{color:var(--warn);border-color:var(--warn)}
       <h3>App installieren</h3>
       <div class="row"><button id="installBtn" type="button" hidden>Wellenschlag installieren</button></div>
       <p class="note left" id="installNote">Wenn Wellenschlag über GitHub Pages läuft, kannst du die App installieren. Sie bekommt dann ein eigenes Symbol auf dem Startbildschirm, läuft im Vollbild und funktioniert auch offline. In Chrome geht das auch über das Menü ⋮ → „App installieren“.</p>
+    </section>
+
+    <section data-tab="dev" hidden>
+      <h3>Schläge per Bewegungssensor</h3>
+      <p class="note left" id="motLiveNote"></p>
+      <p class="note left">Im Test hat der Sensor 57 von 58 selbst gezählten Schlägen erkannt, der Zähler des Geräts nur 34. Kommen keine Sensordaten, zum Beispiel am Computer, nimmt die App automatisch den Zähler des Geräts.</p>
     </section>
 
     <section data-tab="dev" hidden>
@@ -1200,7 +1315,7 @@ function fmtDist(m){ return Math.round(m).toLocaleString('de-DE'); }
 function goalName(){ return goal.type === 'd' ? fmtDist(goal.value) + ' m' : fmtTime(goal.value); }
 function goalValues(secs, realDist, shownDist){
   if (!goal){
-    const none = {text: '–', sub: 'Ziel unter „Werte“ → Training wählen'};
+    const none = {text: '–', sub: 'Ziel unter „Training“ wählen'};
     return {goal: none, remain: {...none, bar: 0}};
   }
   const v = realDist >= 10 && secs > 0 ? realDist / secs : null;     // Ø Geschwindigkeit in m/s
@@ -1330,7 +1445,7 @@ function buildScreens(){
   if (!screens.length){
     const e = document.createElement('div');
     e.className = 'screen empty';
-    e.textContent = 'Keine Werte eingeschaltet. Tippe auf „Werte“, um welche auszuwählen.';
+    e.textContent = 'Keine Werte eingeschaltet. Tippe oben rechts auf das Zahnrad → „Anzeige beim Rudern“.';
     pager.appendChild(e);
   }
   screens.forEach((grp, si) => {
@@ -1744,11 +1859,17 @@ function syncProfileUi(){
   if (document.activeElement !== $('age')) $('age').value = profile.age ?? '';
   if (document.activeElement !== $('weight')) $('weight').value = profile.weight ?? '';
 }
-document.querySelectorAll('#sexSeg button').forEach(b => b.onclick = () => { profile.sex = b.dataset.s; saveProfile(); syncProfileUi(); });
-$('age').oninput = e => { const v = Number(e.target.value); profile.age = v >= 10 && v <= 100 ? Math.round(v) : null; saveProfile(); };
-$('weight').oninput = e => { const v = Number(String(e.target.value).replace(',', '.')); profile.weight = v >= 30 && v <= 250 ? Math.round(v * 10) / 10 : null; saveProfile(); };
+document.querySelectorAll('#sexSeg button').forEach(b => b.onclick = () => { profile.sex = b.dataset.s; saveProfile(); syncProfileUi(); showProfSaved(); });
+// Nur gültige Eingaben übernehmen. Leeres Feld oder halb getippte Zahl ändert nichts: Es bleibt der zuletzt gespeicherte Wert.
+$('age').oninput = e => { const v = Number(e.target.value); if (e.target.value !== '' && v >= 10 && v <= 100){ profile.age = Math.round(v); saveProfile(); showProfSaved(); } };
+$('weight').oninput = e => { const v = Number(String(e.target.value).replace(',', '.')); if (e.target.value !== '' && v >= 30 && v <= 250){ profile.weight = Math.round(v * 10) / 10; saveProfile(); showProfSaved(); } };
+function showProfSaved(){
+  const p = [profile.sex === 'm' ? 'männlich' : profile.sex === 'f' ? 'weiblich' : null,
+    profile.age ? profile.age + ' Jahre' : null, profile.weight ? String(profile.weight).replace('.', ',') + ' kg' : null, profile.hrMax ? 'Maximalpuls ' + profile.hrMax : null].filter(Boolean);
+  const el = $('profSaved'); if (el) el.textContent = p.length ? 'Gespeichert: ' + p.join(' · ') : 'Noch nichts gespeichert.';
+}
 $('age').onblur = $('weight').onblur = syncProfileUi;
-syncProfileUi();
+syncProfileUi(); showProfSaved();
 
 // ---------- Kalorien ----------
 // Mit Puls: Formel nach Keytel et al. (2005), berücksichtigt Puls, Gewicht, Alter und Geschlecht.
@@ -1937,7 +2058,7 @@ const BADGES = [
   {id:'first',  cat:'start', name:'Leinen los',     desc:'Erste gespeicherte Einheit', v:S=>S.sessions, t:1, f:'count',
     help:'Bekommst du für deine erste gespeicherte Einheit. Der Name kommt aus der Seefahrt: „Leinen los“ ist das Kommando zum Ablegen. Die Einheit muss mindestens 1 Minute lang sein, damit sie zählt.'},
   {id:'goal1',  cat:'start', name:'Zielstrebig',    desc:'Ein eigenes Ziel erreicht',   v:S=>S.goals,    t:1, f:'count',
-    help:'Bekommst du, wenn du zum ersten Mal ein eigenes Ziel erreichst. Dafür stellst du unter „Werte“ → „Training“ → „Ziel“ eine Distanz oder Zeit ein, ruderst bis dahin und speicherst die Einheit danach. Ein Ziel zählt nur, wenn es vor dem Beenden erreicht war, also wenn beim Speichern unter „Ziel“ „erreicht“ steht. Verwirfst du die Einheit, zählt es nicht.'},
+    help:'Bekommst du, wenn du zum ersten Mal ein eigenes Ziel erreichst. Dafür stellst du unter „Training“ → „Ziel“ eine Distanz oder Zeit ein, ruderst bis dahin und speicherst die Einheit danach. Ein Ziel zählt nur, wenn es vor dem Beenden erreicht war, also wenn beim Speichern unter „Ziel“ „erreicht“ steht. Verwirfst du die Einheit, zählt es nicht.'},
   {id:'goal5',  cat:'start', name:'Zielbewusst',    desc:'5 Ziele erreicht',            v:S=>S.goals,    t:5, f:'count',
     help:'Bekommst du, wenn du insgesamt 5 Ziele erreicht hast. Es zählt jede gespeicherte Einheit, in der du dein gesetztes Ziel geschafft hast, egal wie groß es war. Ein Ziel zählt nur, wenn es vor dem Beenden erreicht war, also wenn beim Speichern unter „Ziel“ „erreicht“ steht. Verwirfst du die Einheit, zählt es nicht.'},
   {id:'goal10', cat:'start', name:'Zielsicher',     desc:'10 Ziele erreicht',           v:S=>S.goals,    t:10, f:'count',
@@ -2187,7 +2308,7 @@ document.addEventListener('keydown', e => {
 
 // ---------- Daten sichern / wiederherstellen ----------
 $('exportBtn').onclick = async () => {
-  const text = JSON.stringify({v: 2, logbook, earned, wallet});
+  const text = JSON.stringify({v: 2, logbook, earned, wallet, profile});
   try{ await navigator.clipboard.writeText(text); flash($('exportBtn'), 'Kopiert ✓'); }
   catch(_){ $('importBox').value = text; $('importBox').select(); $('importNote').textContent = 'Text ist markiert. Lange drücken und „Kopieren“ wählen.'; }
 };
@@ -2201,6 +2322,7 @@ $('importBtn').onclick = () => {
     earned = {...(d.earned || {}), ...earned}; store('ruderBadges', earned);
     // Werft übernehmen, wenn die gesicherte weiter ist als die aktuelle
     if (d.wallet && (d.wallet.earnedTotal || 0) > (wallet.earnedTotal || 0)){ wallet = {...newWallet(), ...d.wallet}; saveWallet(); }
+    if (d.profile){ for (const k of ['sex', 'age', 'weight', 'hrMax']) if (d.profile[k] && !profile[k]) profile[k] = d.profile[k]; saveProfile(); syncProfileUi(); try{ showProfSaved(); syncHrMax(); }catch(_){} }
     checkBadges(); renderAch();
     $('importNote').textContent = add.length + ' Einheiten übernommen.';
     $('importBox').value = '';
@@ -2519,13 +2641,39 @@ function applyFreezes(){
 }
 
 // ---------- Boot zeichnen ----------
+// Gekauftes Material wächst sichtbar ins Boot hinein: Jedes Bauteil, für das schon Material im Lager liegt,
+// erscheint anteilig (Holz von links nach rechts, Segel von unten nach oben).
+function partProgress(bi){
+  const B = BOATS[bi], avail = {...wallet.inv}, out = {alloc: {}};
+  for (const [p] of PARTS){
+    if (bi === wallet.boat && wallet.parts[p]){ out[p] = 1; continue; }
+    const req = B.need[p]; let have = 0, tot = 0; out.alloc[p] = {};
+    for (const k in req){ const u = Math.min(avail[k] || 0, req[k]); out.alloc[p][k] = u; have += u; tot += req[k]; avail[k] = (avail[k] || 0) - u; }
+    out[p] = tot ? have / tot : 0;
+  }
+  return out;
+}
+function progLayer(bi, built, prog){
+  const T = BOATS[bi].shape, cx = 150, wl = 160, x0 = cx - T.L / 2, top = wl - T.H;
+  let out = '';
+  for (const [p] of PARTS){
+    const f = prog[p] || 0;
+    if (built[p] || f <= 0) continue;
+    const id = 'bcp_' + bi + '_' + p;
+    const r = p === 'segel'
+      ? '<rect x="0" y="' + (top - 2 - f * (T.mh + 8)).toFixed(1) + '" width="300" height="200"/>'
+      : '<rect x="0" y="0" width="' + (x0 - 26 + f * (T.L + 52)).toFixed(1) + '" height="200"/>';
+    out += '<clipPath id="' + id + '">' + r + '</clipPath><g clip-path="url(#' + id + ')" opacity=".55" class="bpGrow">' + boatSVG(bi, {...built, [p]: 1}, {overlay: true}) + '</g>';
+  }
+  return out;
+}
 function boatSVG(bi, built, opts = {}){
   const T = BOATS[bi].shape, cx = 150, wl = 160, x0 = cx - T.L / 2, x1 = cx + T.L / 2, top = wl - T.H, kY = wl + 10;
-  const ghost = 'fill="none" stroke="var(--muted)" stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="4 4"';
+  const ghost = opts.overlay ? 'visibility="hidden"' : 'fill="none" stroke="var(--muted)" stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="4 4"';
   const has = p => !!built[p];
   let out = '';
   // Wasser
-  out += '<path d="M0 ' + (wl + 4) + ' q12 -5 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 V200 H0 Z" fill="var(--sea)" fill-opacity=".22"/>';
+  if (!opts.overlay) out += '<path d="M0 ' + (wl + 4) + ' q12 -5 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 V200 H0 Z" fill="var(--sea)" fill-opacity=".22"/>';
   // Segel und Masten (hinter dem Rumpf)
   T.masts.forEach((mp, i) => {
     const mx = cx + mp * T.L, mh = T.mh * (T.masts.length > 1 && i !== 1 ? 0.82 : 1), mt = top - mh;
@@ -2578,6 +2726,8 @@ function boatSVG(bi, built, opts = {}){
   } else {
     out += '<path d="M' + (x0 + 4) + ' ' + (top + T.H * 0.3) + ' L' + (x1 - 4) + ' ' + (top + T.H * 0.3) + '" ' + ghost + '/>';
   }
+  if (opts.overlay) return out;
+  if (opts.prog) out += progLayer(bi, built, opts.prog);
   if (opts.deck) out += deckLayer(T, x0, x1, top, wl, has);
   return '<svg viewBox="0 ' + (opts.crop ? wl - T.H - T.mh - 14 : 0) + ' 300 ' + (opts.crop ? T.H + T.mh + 54 : 200) + '" role="img" aria-label="' + (opts.label || BOATS[bi].name) + '">' + out + '</svg>';
 }
@@ -2605,16 +2755,17 @@ function renderShop(){
   if (!B){
     $('boatCard').innerHTML = '<span class="label">Werft vollendet</span><h3 class="boatName">Flotte komplett</h3><p style="margin:0">Du hast alle fünf Boote gebaut. Ahoi, Kapitän!</p>' + boatSVG(BOATS.length - 1, {kiel: 1, rumpf: 1, ruder: 1, segel: 1, bemalung: 1});
   } else {
-    const ni = nextPartIdx();
+    const ni = nextPartIdx(), prog = partProgress(wallet.boat);
     $('boatCard').innerHTML = '<span class="label">Boot ' + (wallet.boat + 1) + ' von ' + BOATS.length + '</span><h3 class="boatName">' + B.name + '</h3>' +
-      '<p class="note left" style="margin:-4px 0 0">' + B.blurb + '</p><div class="boatPic">' + boatSVG(wallet.boat, wallet.parts, {deck: true}) + '</div><ol class="parts">' +
+      '<p class="note left" style="margin:-4px 0 0">' + B.blurb + '</p><div class="boatPic">' + boatSVG(wallet.boat, wallet.parts, {deck: true, prog}) + '</div>' +
+      '<p class="bpLegend"><span><i class="lgB"></i>gebaut</span><span><i class="lgM"></i>Material gekauft</span><span><i class="lgG"></i>fehlt noch</span></p><ol class="parts">' +
       PARTS.map(([p, pn], i) => {
         const done = wallet.parts[p], req = B.need[p];
         const ok = Object.keys(req).every(k => (wallet.inv[k] || 0) >= req[k]);
-        const chips = Object.keys(req).map(k => '<span class="needChip' + (done || (wallet.inv[k] || 0) >= req[k] ? ' ok' : '') + '">' + MATS[k].icon + ' ' +
-          (done ? req[k] : Math.min(wallet.inv[k] || 0, req[k]) + '/' + req[k]) + ' ' + MATS[k].name + '</span>').join('');
+        const al = (prog.alloc[p] || {}), chips = Object.keys(req).map(k => '<span class="needChip' + (done || (al[k] || 0) >= req[k] ? ' ok' : '') + '">' + MATS[k].icon + ' ' +
+          (done ? req[k] : (al[k] || 0) + '/' + req[k]) + ' ' + MATS[k].name + '</span>').join('');
         return '<li class="' + (done ? 'done' : i === ni ? 'next' : '') + '"><span class="st">' + (done ? '✓' : i + 1) + '</span><div><span class="pn">' + pn + '</span>' +
-          (done ? '<span class="sb" style="font-size:12px;color:var(--muted);display:block">Gebaut</span>' : '<div class="need">' + chips + '</div>') + '</div>' +
+          (done ? '<span class="sb" style="font-size:12px;color:var(--muted);display:block">Gebaut</span>' : '<div class="need">' + chips + '</div>' + (prog[p] > 0 ? '<div class="bpBar" title="Material für dieses Bauteil"><i style="width:' + Math.round(prog[p] * 100) + '%"></i></div><span class="bpTxt">' + (prog[p] >= 1 ? (i === ni ? 'Material komplett, bereit zum Bauen' : 'Material komplett') : 'Material ' + Math.round(prog[p] * 100) + ' %') + '</span>' : '')) + '</div>' +
           '<button type="button" class="primary" data-build="' + p + '"' + (ok ? '' : ' disabled') + '>Bauen</button></li>';
       }).join('') + '</ol>';
     if (ni >= 0 && !Object.keys(B.need[PARTS[ni][0]]).every(k => (wallet.inv[k] || 0) >= B.need[PARTS[ni][0]][k]))
@@ -4087,7 +4238,7 @@ stats = () => {
 };
 ICONS.boss = '<path d="M12 21V6M7 3v4a5 5 0 0 0 10 0V3M12 3v4M9 17h6"/>';
 CAT_COLOR.boss = 'var(--monster)';
-CAT_HELP.boss = 'Zählt deine Siege gegen die Seemonster und alle Spezialangriffe, die du abgewehrt hast. Die Kämpfe startest du unter „Werte“ → „Spiel“ → „Boss-Kämpfe“. Ein Sieg zählt erst, wenn du die Einheit danach speicherst.';
+CAT_HELP.boss = 'Zählt deine Siege gegen die Seemonster und alle Spezialangriffe, die du abgewehrt hast. Die Kämpfe startest du unter „Training“ → „Boss-Kampf“. Ein Sieg zählt erst, wenn du die Einheit danach speicherst.';
 CATS.splice(CATS.findIndex(c => c[0] === 'collect'), 0, ['boss', 'Seemonster – Boss-Kämpfe']);
 BADGES.push(
   {id: 'boss1', cat: 'boss', name: 'Monsterjäger', desc: 'Dein erstes Seemonster besiegt', v: S => S.bossN, t: 1, f: 'count'},
@@ -4142,7 +4293,7 @@ $('csvOut').onclick = () => {
   flash($('csvOut'), logbook.length + ' Einheiten gespeichert ✓');
 };
 $('backupOut').onclick = () => {
-  downloadFile('wellenschlag-sicherung-' + stamp() + '.json', JSON.stringify({v: 2, logbook, earned, wallet}), 'application/json');
+  downloadFile('wellenschlag-sicherung-' + stamp() + '.json', JSON.stringify({v: 2, logbook, earned, wallet, profile}), 'application/json');
   flash($('backupOut'), 'Gespeichert ✓');
 };
 
@@ -4399,6 +4550,7 @@ function restoreBackup(d){
   logbook = logbook.concat(add); store('ruderHistory', logbook);
   earned = {...(d.earned || {}), ...earned}; store('ruderBadges', earned);
   if (d.wallet && (d.wallet.earnedTotal || 0) > (wallet.earnedTotal || 0)){ wallet = {...newWallet(), ...d.wallet}; saveWallet(); }
+  if (d.profile){ for (const k of ['sex', 'age', 'weight', 'hrMax']) if (d.profile[k] && !profile[k]) profile[k] = d.profile[k]; saveProfile(); syncProfileUi(); try{ showProfSaved(); syncHrMax(); }catch(_){} }
   return add.length;
 }
 function doImport(){
@@ -4532,8 +4684,8 @@ const hrMax = () => profile.hrMax || (profile.age ? Math.round(208 - 0.7 * profi
 const zoneOf = hr => { const m = hrMax(); if (!m || !hr) return -1; const p = hr / m; let z = -1; ZONES.forEach((Z, i) => { if (p >= Z.lo) z = i; }); return z; };
 function zoneMetric(){
   const hr = currentHr(), m = hrMax();
-  if (!m) return {text: '–', label: 'Pulszone', sub: 'Alter oder Maximalpuls unter „Werte“ → Training → Profil eintragen'};
-  if (!hr) return {text: '–', label: 'Pulszone', sub: 'Kein Puls. Pulsmesser unter „Werte“ → Gerät verbinden.'};
+  if (!m) return {text: '–', label: 'Pulszone', sub: 'Alter oder Maximalpuls unter Einstellungen → Profil eintragen'};
+  if (!hr) return {text: '–', label: 'Pulszone', sub: 'Kein Puls. Pulsmesser unter Einstellungen → Rudergerät und Pulsmesser verbinden.'};
   const z = zoneOf(hr), p = hr / m, sec = s.hz && z >= 0 ? Math.round(s.hz[z] / 1000) : 0;
   return {text: z >= 0 ? ZONES[z].n : '–', label: z >= 0 ? 'Pulszone · ' + ZONES[z].name : 'Pulszone · unter Z1', unit: '',
     bar: Math.max(0, Math.min(1, (p - 0.5) / 0.5)),
@@ -4557,7 +4709,7 @@ extraSnap = () => {
   return o;
 };
 // Profil: Maximalpuls
-$('hrMax').oninput = e => { const v = Number(e.target.value); profile.hrMax = v >= 120 && v <= 230 ? Math.round(v) : null; saveProfile(); syncHrMax(); };
+$('hrMax').oninput = e => { const raw = e.target.value, v = Number(raw); if (raw !== '' && v >= 120 && v <= 230){ profile.hrMax = Math.round(v); saveProfile(); syncHrMax(); showProfSaved(); } else if (raw === '0'){ profile.hrMax = null; saveProfile(); syncHrMax(); showProfSaved(); } };
 function syncHrMax(){
   if (document.activeElement !== $('hrMax')) $('hrMax').value = profile.hrMax ?? '';
   const m = hrMax();
@@ -4947,12 +5099,15 @@ function motDetect(t){
   const sig = mot.sig, N = sig.length;
   if (N > MOT_HZ * 6 && N % 5 === 0){
     const w = sig.slice(-MOT_HZ * 12), mean = w.reduce((a, b) => a + b, 0) / w.length, d = w.map(x => x - mean);
-    let best = 0, lag0 = 0; const e0 = d.reduce((a, x) => a + x * x, 0) || 1;
-    for (let lag = Math.round(MOT_HZ * 1.5); lag <= MOT_HZ * 4; lag++){
+    let best = 0, lag0 = 0; const e0 = d.reduce((a, x) => a + x * x, 0) || 1, cs = {};
+    for (let lag = Math.round(MOT_HZ * 1.2); lag <= MOT_HZ * 4.5; lag++){
       let c = 0; for (let i = lag; i < d.length; i++) c += d[i] * d[i - lag];
-      c /= e0 * (d.length - lag) / d.length;
+      c /= e0 * (d.length - lag) / d.length; cs[lag] = c;
       if (c > best){ best = c; lag0 = lag; }
     }
+    // Oktavfehler: Ist die halbe Periode fast gleich stark, ist sie der echte Takt
+    const h = Math.round(lag0 / 2); let hb = 0, hl = 0; for (let l = h - 2; l <= h + 2; l++) if (cs[l] > hb){ hb = cs[l]; hl = l; }
+    if (hl && hb >= 0.75 * best){ best = hb; lag0 = hl; }
     mot.spm = best > 0.25 ? 60 * MOT_HZ / lag0 : null; mot.quality = best;
   }
   // Spitze: lokales Maximum über einer gleitenden Schwelle, mindestens 75 % eines Schlagtakts nach der letzten
@@ -5043,7 +5198,7 @@ $('motSave').onclick = () => {
 let lastSess = null;                       // Werte der zuletzt beendeten Einheit, falls schon auf „Beenden“ getippt wurde
 const _resetSessionC = resetSession;
 resetSession = (...a) => {
-  if (s.firstStroke && (s.strokes || s.devDist)) lastSess = {strokes: s.strokes || 0, secs: Math.round(s.activeMs / 1000), dist: Math.round(s.devDist || 0), devTime: s.devTime ?? null};
+  if (s.firstStroke && (s.strokes || s.devDist)) lastSess = {strokes: strokesBest(), dev: s.strokes || 0, mot: motActive() ? s.motStrokes || 0 : null, secs: Math.round(s.activeMs / 1000), dist: Math.round(s.devDist || 0), devTime: s.devTime ?? null};
   return _resetSessionC(...a);
 };
 let countEntries = [];
@@ -5051,12 +5206,13 @@ $('countBtn').onclick = () => {
   const n = Math.round(Number($('countIn').value));
   if (!(n > 0)){ $('countNote').textContent = 'Bitte eine Zahl eintragen.'; $('countIn').focus(); return; }
   const live = s.firstStroke && (s.strokes || s.devDist);
-  const v = live ? {strokes: s.strokes || 0, secs: Math.round(s.activeMs / 1000), dist: Math.round(s.devDist || 0), devTime: s.devTime ?? null} : lastSess;
+  const v = live ? {strokes: strokesBest(), dev: s.strokes || 0, mot: motActive() ? s.motStrokes || 0 : null, secs: Math.round(s.activeMs / 1000), dist: Math.round(s.devDist || 0), devTime: s.devTime ?? null} : lastSess;
   if (!logging) setLogging(true);
   let line = n + ' Schläge';
   if (v){
     const d = v.strokes - n, pct = n ? Math.round(d / n * 100) : 0;
-    line += ' | App/Gerät: ' + v.strokes + ' (' + (d === 0 ? 'gleich' : (d > 0 ? '+' : '') + d + ', ' + (pct > 0 ? '+' : '') + pct + ' %') + ')' +
+    line += ' | App: ' + v.strokes + ' (' + (d === 0 ? 'gleich' : (d > 0 ? '+' : '') + d + ', ' + (pct > 0 ? '+' : '') + pct + ' %') + ')' +
+      (v.mot != null ? ' | Bewegungssensor ' + v.mot : '') + ' | Gerätezähler ' + (v.dev ?? v.strokes) +
       ' | Ruderzeit ' + fmtTime(v.secs) + (v.devTime != null ? ' (Gerät ' + fmtTime(v.devTime) + ')' : '') + ' | Distanz ' + v.dist + ' m' +
       ' | Schlagzahl selbst ' + (v.secs ? (n / v.secs * 60).toFixed(1).replace('.', ',') : '–') + ', App ' + (v.secs ? (v.strokes / v.secs * 60).toFixed(1).replace('.', ',') : '–') + ' pro Minute' +
       (live ? '' : ' | Einheit war schon beendet');
@@ -5136,14 +5292,23 @@ function hullPath(g, L, W){
   g.lineTo(-W * 0.36, L / 2);
   g.bezierCurveTo(-W * 0.52, L * 0.22, -W * 0.62, -L * 0.22, 0, -L / 2); g.closePath();
 }
+const oarCol = () => getComputedStyle(document.body).getPropertyValue('--fg').trim() || '#e8f3f2';
 function oars(g, L, W, ph, col, one){
-  const a = Math.sin(ph * TAU) * 0.55, len = W * 1.9;
-  g.strokeStyle = col; g.lineWidth = 2.5; g.lineCap = 'round';
+  // Riemen stehen quer zum Boot (90°) und schwingen um die Dolle: Durchzug (gut ein Drittel des Schlags) vom Bug zum Heck
+  // mit Blatt im Wasser, danach flach gedreht zurück nach vorn.
+  const p = ((ph % 1) + 1) % 1, A = 0.7, D = 0.36, ease = x => 0.5 - 0.5 * Math.cos(Math.PI * x);
+  const drive = p < D, th = drive ? -A + 2 * A * ease(p / D) : A - 2 * A * ease((p - D) / (1 - D));
+  const len = W * 1.75, inb = W * 0.5, py = L * 0.02;
+  g.strokeStyle = col; g.fillStyle = col; g.lineCap = 'round';
   [1, -1].forEach(side => {
     if (one && side < 0) return;
-    const ang = side * (Math.PI / 2) + side * a * -1, x = Math.cos(ang) * len, y = Math.sin(ang) * len * 0.6 + L * 0.02;
-    g.beginPath(); g.moveTo(0, L * 0.02); g.lineTo(x, y); g.stroke();
-    g.beginPath(); g.ellipse(x, y, 5, 9, ang, 0, TAU); g.fillStyle = col; g.fill();
+    const px = side * W * 0.42, c = Math.cos(th), s = Math.sin(th);
+    const bx = px + side * c * len, by = py + s * len * 0.85, hx = px - side * c * inb, hy = py - s * inb * 0.85;
+    g.lineWidth = 2.5; g.beginPath(); g.moveTo(hx, hy); g.lineTo(bx, by); g.stroke();
+    const ang = Math.atan2(by - py, bx - px);
+    g.save(); g.translate(bx, by); g.rotate(ang); g.globalAlpha *= drive ? 1 : 0.7;
+    g.beginPath(); g.ellipse(0, 0, 9, drive ? 4.5 : 1.8, 0, 0, TAU); g.fill(); g.restore();
+    if (drive && p > D * 0.15 && p < D * 0.9){ g.save(); g.globalAlpha *= 0.35; g.beginPath(); g.arc(bx, by + 6, 4 + 6 * (p / D), 0, TAU); g.stroke(); g.restore(); }
   });
 }
 function emoji(g, ch, size, x = 0, y = 0){ g.font = size + 'px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ch, x, y); }
@@ -5156,8 +5321,8 @@ function drawOpp(g, O, L, t, ph){
     g.restore(); return;
   }
   if (O.deco === 'tub'){ emoji(g, '🛁', L * 0.66); g.shadowBlur = 0; oars(g, L * 0.8, W, ph, '#8fb0b2', true); g.restore(); return; }
-  if (O.deco === 'invisible'){ g.setLineDash([4, 6]); g.strokeStyle = 'rgba(232,243,242,.35)'; g.lineWidth = 1.5; hullPath(g, L, W); g.stroke(); g.setLineDash([]); oars(g, L, W, ph, '#e8f3f2'); g.restore(); return; }
-  oars(g, L, W, ph, '#e8f3f2');
+  if (O.deco === 'invisible'){ g.setLineDash([4, 6]); g.strokeStyle = 'rgba(232,243,242,.35)'; g.lineWidth = 1.5; hullPath(g, L, W); g.stroke(); g.setLineDash([]); oars(g, L, W, ph, oarCol()); g.restore(); return; }
+  oars(g, L, W, ph, oarCol());
   hullPath(g, L, W); g.fillStyle = O.hull; g.fill(); g.shadowBlur = 0;
   if (O.deco === 'sail'){ g.globalAlpha = 0.55; g.beginPath(); g.moveTo(-W * 1.1, -L * 0.12); g.lineTo(W * 1.1, -L * 0.12); g.lineTo(W * 1.0, L * 0.04); g.lineTo(W * 0.6, -L * 0.01); g.lineTo(W * 0.3, L * 0.06); g.lineTo(0, -L * 0.02); g.lineTo(-W * 0.4, L * 0.07); g.lineTo(-W * 0.7, 0); g.lineTo(-W * 1.0, L * 0.05); g.closePath(); g.fillStyle = '#eef1ff'; g.fill(); g.globalAlpha = 0.8; }
   if (O.deco === 'fog'){ g.fillStyle = 'rgba(255,255,255,.18)'; [[-W, L * 0.3, 14], [W * 0.9, -L * 0.1, 12], [-W * 0.6, -L * 0.35, 10], [W * 0.5, L * 0.42, 13]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x + Math.sin(t / 900 + x) * 4, y, r, 0, TAU); g.fill(); }); }
@@ -5168,7 +5333,7 @@ function drawOpp(g, O, L, t, ph){
 }
 function drawMe(g, L, ph){
   const W = L * 0.36;
-  oars(g, L, W, ph, '#e8f3f2');
+  oars(g, L, W, ph, oarCol());
   hullPath(g, L, W); g.fillStyle = getComputedStyle(document.body).getPropertyValue('--water').trim() || '#3fc4c9'; g.fill();
   g.beginPath(); g.arc(0, L * 0.04, W * 0.42, 0, TAU); g.fillStyle = '#f2b24c'; g.fill();
 }
@@ -5179,15 +5344,17 @@ function renderRace(m){
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)){ c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
   const started = s.firstStroke && s.ghostD != null, my = s.distShown || 0, gd = started ? s.ghostD : 0, gap = my - gd, t = performance.now();
+  const VIS = raceVis(started), myV = VIS.my, gdV = VIS.g, gapV = myV - gdV, Rr = s.race, fin = Rr && Rr.dist ? Rr.dist : (started ? 0 : ghostCfg.dist || 0);
   // Maßstab: Abstand passt mit etwas Luft ins Bild, wechselt sanft
   const want = Math.max(40, Math.min(180, Math.abs(gap) * 1.5 + 30));
   s.raceSpan = s.raceSpan ? s.raceSpan + (want - s.raceSpan) * 0.04 : want;
-  const ppm = H / s.raceSpan, yMe = H * (gap < 0 ? 0.7 : 0.4), xMe = W * 0.32, xG = W * 0.68, L = Math.min(72, H * 0.2);
-  const yOf = d => yMe - (d - my) * ppm, css = getComputedStyle(document.body);
+  s.raceY = (s.raceY ?? 0.55) + ((gapV < 0 ? 0.7 : 0.4) - (s.raceY ?? 0.55)) * 0.05;
+  const ppm = H / s.raceSpan, yMe = H * s.raceY, xMe = W * 0.32, xG = W * 0.68, L = Math.min(72, H * 0.2);
+  const yOf = d => yMe - (d - myV) * ppm, css = getComputedStyle(document.body);
   const mut = css.getPropertyValue('--muted').trim() || '#8fb0b2', fg = css.getPropertyValue('--fg').trim() || '#e8f3f2', water = css.getPropertyValue('--water').trim() || '#3fc4c9';
   // Wasser: kleine Wellen, die mit dir vorbeiziehen
   g.strokeStyle = water; g.globalAlpha = 0.22; g.lineWidth = 2; g.lineCap = 'round';
-  const d0 = my - (H - yMe) / ppm, d1 = my + yMe / ppm;
+  const d0 = myV - (H - yMe) / ppm, d1 = myV + yMe / ppm;
   for (let k = Math.floor(d0 / 6); k <= d1 / 6; k++){ const x = rHash(k) * W, y = yOf(k * 6 + rHash(k + 77) * 6); g.beginPath(); g.moveTo(x - 9, y); g.quadraticCurveTo(x, y - 6, x + 9, y); g.stroke(); }
   g.globalAlpha = 1;
   // Bojen alle 25 m, Linie und Beschriftung alle 100 m
@@ -5197,12 +5364,22 @@ function renderRace(m){
     if (d >= 0){ g.fillStyle = '#f2b24c'; g.beginPath(); g.arc(W / 2, y, d % 100 === 0 ? 4 : 2.5, 0, TAU); g.fill(); }
   }
   // Ruderphase aus Schlagzahl
-  const spm = s.spmShown || 0, phMe = spm ? ((t / 1000) * spm / 60) % 1 : 0.25, phG = started ? ((t / 1000) * 20 / 60 + 0.3) % 1 : 0.25;
+  const phMe = VIS.phMe, phG = VIS.phG;
+  // Ziellinie: Schachbrettband quer über die Bahn
+  if (fin && fin >= d0 - 5 && fin <= d1 + 5){
+    const yF = yOf(fin), sq = 7, n = Math.ceil((W - 16) / sq);
+    for (let r = 0; r < 2; r++) for (let k = 0; k < n; k++){ g.fillStyle = (k + r) % 2 ? fg : (css.getPropertyValue('--bg').trim() || '#0b1d22'); g.globalAlpha = 0.75; g.fillRect(8 + k * sq, yF - sq + r * sq, sq, sq); }
+    g.globalAlpha = 1; g.fillStyle = '#f2b24c'; g.font = '700 12px "IBM Plex Sans",sans-serif'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText('ZIEL ' + fmtDist(fin) + ' m', W - 10, yF - sq - 3);
+  }
   // Kielwasser
   g.strokeStyle = fg; g.globalAlpha = 0.15; g.lineWidth = 2;
   g.beginPath(); g.moveTo(xMe - 6, yMe + L / 2); g.lineTo(xMe - 26, H); g.moveTo(xMe + 6, yMe + L / 2); g.lineTo(xMe + 26, H); g.stroke(); g.globalAlpha = 1;
   // Gegner (oder Pfeil am Rand, wenn er aus dem Bild ist)
-  const yG = yOf(gd);
+  const yG = yOf(gdV);
+  if (started && (s.gV || 0) > 0.3 && yG > -L && yG < H + L){   // Kielwasser des Gegners
+    g.strokeStyle = fg; g.globalAlpha = 0.1; g.lineWidth = 2; g.beginPath();
+    g.moveTo(xG - 6, yG + L / 2); g.lineTo(xG - 24, Math.min(H, yG + L * 3)); g.moveTo(xG + 6, yG + L / 2); g.lineTo(xG + 24, Math.min(H, yG + L * 3)); g.stroke(); g.globalAlpha = 1;
+  }
   if (yG < -L * 0.4 || yG > H + L * 0.4){
     const top = yG < 0, ya = top ? 18 : H - 18;
     g.fillStyle = O.glow || fg; g.beginPath();
@@ -5226,7 +5403,7 @@ function renderRace(m){
   let label, num, unit = 'm', side = '', trend = '', cls = '';
   if (!started){ label = 'Gegner: ' + O.short; num = '±0'; side = 'Start mit deinem ersten Schlag'; }
   else {
-    label = (gap >= 0 ? 'Vor ' : 'Hinter ') + O.dat; num = (gap >= 0 ? '+' : '−') + Math.abs(Math.round(gap)); cls = gap >= 0 ? 'ahead' : 'behind';
+    label = (gap >= 0 ? 'Vor ' : 'Hinter ') + O.dat; num = Math.round(gap) === 0 ? '±0' : (gap >= 0 ? '+' : '−') + Math.abs(Math.round(gap)); cls = gap >= 0 ? 'ahead' : 'behind';
     const vG = 500 / (base / ghostFactor(s.activeMs / 1000)), vM = s.speed > 0.3 ? s.speed : vG, sec = Math.abs(gap) / ((vG + vM) / 2);
     side = (gap >= 0 ? '+' : '−') + sec.toFixed(1).replace('.', ',') + ' s';
     if (R && R.hist.length > 4){ const d = gap - R.hist[0][1]; trend = Math.abs(d) < 1 ? '= gleichauf im Trend' : (d > 0 ? '▲ ' + (gap >= 0 ? 'du baust aus' : 'du holst auf') : '▼ ' + (gap >= 0 ? 'er holt auf' : 'er zieht davon')); }
@@ -5234,9 +5411,10 @@ function renderRace(m){
   put(m.label, 'textContent', label); put(m.num, 'textContent', num); put(m.unit, 'textContent', unit);
   put(m.side, 'textContent', side); put(m.trend, 'textContent', trend);
   m.el.classList.toggle('ahead', cls === 'ahead'); m.el.classList.toggle('behind', cls === 'behind');
-  const rest = goal && goal.type === 'd' ? Math.max(0, goal.value - my) : null;
-  put(m.foot1, 'textContent', (started ? O.short + ' ' + fmtPace(base / ghostFactor(s.activeMs / 1000)) : O.short + ' Ø ' + fmtPace(base)) + ' /500');
-  put(m.foot2, 'textContent', rest != null ? 'noch ' + fmtDist(Math.round(rest)) + ' m bis zum Ziel' : '');
+  const rest = Rr && Rr.dist && !Rr.done ? Math.max(0, Rr.dist - my) : !started && ghostCfg.dist ? ghostCfg.dist : goal && goal.type === 'd' ? Math.max(0, goal.value - my) : null;
+  if (Rr && Rr.done){ put(m.num, 'textContent', (Rr.win ? '+' : '−') + Math.abs(Rr.win ? Rr.gapM : Rr.gapM || 0)); m.el.classList.toggle('ahead', !!Rr.win); m.el.classList.toggle('behind', !Rr.win); put(m.label, 'textContent', Rr.win ? 'Gewonnen gegen ' + O.acc : capFirst(O.nom) + ' war schneller'); put(m.side, 'textContent', fmtPace(Rr.mFin)); put(m.trend, 'textContent', (Rr.win ? '+' : '−') + fmtSec(Rr.gap1)); }
+  put(m.foot1, 'textContent', Rr && Rr.gFin != null ? O.short + ' im Ziel nach ' + fmtPace(Rr.gFin) : (started ? O.short + ' ' + fmtPace(base / ghostFactor(s.activeMs / 1000)) : O.short + ' Ø ' + fmtPace(base)) + ' /500');
+  put(m.foot2, 'textContent', Rr && Rr.done ? 'Rennen beendet' : rest != null ? 'noch ' + fmtDist(Math.round(rest)) + ' m bis zum Ziel' : 'offenes Rennen');
 }
 
 // ---------- Bildschirm: Rennbahn bekommt einen eigenen Bildschirm ----------
@@ -5297,7 +5475,9 @@ extraAfter = (x, before, R, EX) => {
   const ev = _extraAfterR(x, before, R, EX);
   if (x.race){
     const O = OPPS.find(o => o.id === x.race.opp) || OPPS[0], g = x.race.gap;
-    const head = g > 0 ? '<b>Gewonnen gegen ' + O.acc + '</b> mit ' + g + ' m Vorsprung!' : g < 0 ? '<b>' + capFirst(O.nom) + ' war ' + -g + ' m vorn.</b> Beim nächsten Mal!' : '<b>Unentschieden</b> gegen ' + O.acc + '!';
+    const head = x.race.win === 1 ? '<b>Sieg gegen ' + O.acc + '</b> über ' + fmtDist(x.race.dist) + ' m in ' + fmtPace(x.race.t) + ', ' + fmtSec(x.race.by) + ' Vorsprung!' :
+      x.race.win === 0 ? '<b>' + capFirst(O.nom) + ' war ' + fmtSec(x.race.by) + ' schneller</b> über ' + fmtDist(x.race.dist) + ' m. Beim nächsten Mal!' :
+      g > 0 ? '<b>Gewonnen gegen ' + O.acc + '</b> mit ' + g + ' m Vorsprung!' : g < 0 ? '<b>' + capFirst(O.nom) + ' war ' + -g + ' m vorn.</b> Beim nächsten Mal!' : '<b>Unentschieden</b> gegen ' + O.acc + '!';
     ev.unshift([O.icon, head + (x.race.changes ? ' ' + x.race.changes + (x.race.changes === 1 ? ' Führungswechsel.' : ' Führungswechsel.') : '') + raceSpark(x.race)]);
   }
   return ev;
@@ -5314,8 +5494,405 @@ const _renderTrainingR = renderTraining;
 renderTraining = () => { _renderTrainingR(); try{ renderOpps(); }catch(_){} };
 renderOpps();
 
+// =====================================================================
+// Schläge per Bewegungssensor zählen (im Training)
+// =====================================================================
+// Erkenntnis aus dem Sensor-Test: Der Zähler des Geräts verpasst bei höherer Schlagzahl viele Schläge
+// (58 gezählt, Gerät 34), der Bewegungssensor in der Halterung erkennt sie (54 bis 59).
+function makeDetector(){
+  const D = {last: -1, acc: [0, 0, 0], n: 0, hp: null, lp: 0, sig: [], peaks: [], spm: null, quality: 0, t0: performance.now()};
+  D.push = (a, nowMs) => {
+    D.acc[0] += a.x; D.acc[1] += a.y; D.acc[2] += a.z; D.n++;
+    const t = (nowMs - D.t0) / 1000;
+    if (t - D.last < 1 / MOT_HZ) return null;
+    D.last = t - D.last > 0.2 ? t : D.last + 1 / MOT_HZ;
+    const v = D.acc.map(x => x / D.n); D.acc = [0, 0, 0]; D.n = 0;
+    D.hp = D.hp ? D.hp.map((g, i) => g + (v[i] - g) * 0.02) : v.slice();
+    D.lp += (Math.hypot(v[0] - D.hp[0], v[1] - D.hp[1], v[2] - D.hp[2]) - D.lp) * 0.35;
+    D.sig.push(D.lp); if (D.sig.length > MOT_HZ * 20) D.sig.shift();
+    D.k = (D.k || 0) + 1;
+    const sig = D.sig, N = sig.length;
+    if (N > MOT_HZ * 6 && D.k % 5 === 0){
+      const w = sig.slice(-MOT_HZ * 12), mean = w.reduce((p, q) => p + q, 0) / w.length, d = w.map(x => x - mean), e0 = d.reduce((p, x) => p + x * x, 0) || 1;
+      const cs = [];
+      for (let lag = Math.round(MOT_HZ * 1.2); lag <= MOT_HZ * 4.5; lag++){ let c = 0; for (let i = lag; i < d.length; i++) c += d[i] * d[i - lag]; cs.push([lag, c / (e0 * (d.length - lag) / d.length)]); }
+      const best = cs.reduce((p, q) => q[1] > p[1] ? q : p, [0, 0]);
+      // Oktavfehler vermeiden: hat die halbe Periode fast genauso viel Ähnlichkeit, ist sie der echte Takt
+      const half = cs.filter(q => Math.abs(q[0] - best[0] / 2) <= 2).reduce((p, q) => q[1] > p[1] ? q : p, [0, 0]);
+      const pick = half[0] && half[1] >= 0.75 * best[1] ? half : best;
+      D.spm = pick[1] > 0.25 ? 60 * MOT_HZ / pick[0] : null; D.quality = pick[1];
+    }
+    if (N >= 3){
+      const i = N - 2, w = sig.slice(-MOT_HZ * 8), mean = w.reduce((p, q) => p + q, 0) / w.length;
+      const sd = Math.sqrt(w.reduce((p, x) => p + (x - mean) ** 2, 0) / w.length);
+      const minGap = D.spm ? 0.75 * 60 / D.spm : 1.4, tp = t - 1 / MOT_HZ, last = D.peaks.length ? D.peaks[D.peaks.length - 1] : -1e9;
+      if (sig[i] > sig[i - 1] && sig[i] >= sig[i + 1] && sig[i] > mean + 0.8 * sd && tp - last >= minGap){
+        D.peaks.push(tp); if (D.peaks.length > 50) D.peaks.shift();
+        return D.t0 + tp * 1000;                                   // Zeitpunkt des erkannten Schlags (ms)
+      }
+    }
+    return null;
+  };
+  return D;
+}
+const motCfg = {on: true};        // immer an: der Sensor zählt genauer als das Gerät
+let motLive = null, vibUntil = 0;
+// Eigene Vibrationen der App erzeugen Stöße im Sensor: kurz danach nichts zählen
+try{
+  const _vib = navigator.vibrate ? navigator.vibrate.bind(navigator) : null;
+  if (_vib) navigator.vibrate = p => { const ms = Array.isArray(p) ? p.reduce((a, b) => a + b, 0) : (+p || 0); vibUntil = performance.now() + ms + 400; return _vib(p); };
+}catch(_){}
+function motLiveEvent(e){
+  const a = e.accelerationIncludingGravity || e.acceleration; if (!a || a.x == null || !motLive) return;
+  const now = performance.now(); motLive.lastEv = now;
+  const st = motLive.det.push(a, now);
+  if (st == null || now < vibUntil) return;
+  const rowing = s.devTimeUpT != null && now - s.devTimeUpT < 2500;
+  if (rowing){
+    // Schläge kurz vor dem Start (bevor die Gerätezeit läuft) nachträglich mitzählen
+    if (motLive.pending.length){ motLive.pending.filter(p => st - p < 8000).forEach(p => motAddStroke(p)); motLive.pending = []; }
+    motAddStroke(st);
+  } else { motLive.pending.push(st); motLive.pending = motLive.pending.filter(p => st - p < 8000); }
+}
+function motAddStroke(ts){
+  s.motStrokes = (s.motStrokes || 0) + 1;
+  const T = s.motTimes || (s.motTimes = []); T.push(ts); if (T.length > 12) T.shift();
+}
+// Startet sofort beim Öffnen. Verlangt Chrome eine Erlaubnis, wird sie beim ersten Antippen der App eingeholt.
+async function motLiveStart(fromGesture){
+  if (typeof DeviceMotionEvent === 'undefined'){ motStatus('Dieser Browser hat keinen Bewegungssensor. Die App nimmt den Zähler des Geräts.'); return; }
+  if (!motLive){ motLive = {det: makeDetector(), pending: [], lastEv: 0}; addEventListener('devicemotion', motLiveEvent); }
+  if (fromGesture && !motActive() && !motLive.asked && typeof DeviceMotionEvent.requestPermission === 'function'){
+    motLive.asked = true;
+    try{ const r = await DeviceMotionEvent.requestPermission(); if (r !== 'granted') motStatus('Zugriff auf den Bewegungssensor wurde abgelehnt. Die App nimmt den Zähler des Geräts.'); }catch(_){}
+  }
+  setTimeout(() => motStatus(), 2500);
+}
+const motActive = () => !!(motLive && performance.now() - motLive.lastEv < 2000);
+function motStatus(err){
+  const el = $('motLiveNote'); if (!el) return;
+  el.textContent = err || (motActive() ? 'Aktiv: Schläge und Schlagzahl kommen vom Bewegungssensor des Handys. Das Handy muss dafür fest in der Halterung stecken.'
+    : 'Läuft immer mit. Gerade kommen keine Sensordaten. Dann nimmt die App den Zähler des Geräts.');
+}
+$('connectBtn').addEventListener('click', () => motLiveStart(true));
+document.addEventListener('pointerdown', () => motLiveStart(true), {once: true, capture: true});
+motLiveStart(false); motStatus();
+$('settingsBtn').addEventListener('click', () => motStatus());
+
+// Schläge und Schlagzahl: Bewegungssensor zuerst, sonst Gerät
+const _strokesBestM = strokesBest;
+strokesBest = () => motActive() && s.motStrokes != null ? s.motStrokes : _strokesBestM();
+const _bestSpmM = bestSpm;
+bestSpm = () => {
+  if (motActive()){
+    const T = (s.motTimes || []).slice(-7), iv = [];
+    for (let i = 1; i < T.length; i++){ const d = T[i] - T[i - 1]; if (d < 6000) iv.push(d); }
+    const rowing = s.devTimeUpT != null && performance.now() - s.devTimeUpT < 2500;
+    if (!rowing) return [0, 'Bewegungssensor (steht)'];
+    if (iv.length >= 3){ iv.sort((a, b) => a - b); return [60000 / iv[iv.length >> 1], 'Bewegungssensor des Handys']; }
+  }
+  return _bestSpmM();
+};
+const _drawFrameM = drawFrame;
+drawFrame = () => {
+  _drawFrameM();
+  const el = $('dStrokes');
+  if (el && motCfg.on){ const v = (motActive() ? (s.motStrokes || 0) + ' per Bewegung · ' : 'Bewegungssensor ohne Daten · ') + (s.strokes ?? 0) + ' laut Gerät'; if (el.textContent !== v) el.textContent = v; }
+};
+
 const _resetSessionB = resetSession;
 resetSession = () => { _resetSessionB(); activeBoss = null; renderBossBar(); };
+
+// =====================================================================
+// Geisterrennen 2: fließende Bahn, lebendiger Gegner, Ziellinie, Siegerehrung
+// =====================================================================
+if (ghostCfg.dist == null) ghostCfg.dist = 1000;          // 0 = ohne Ziellinie
+const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * v); };
+// Schlagzahl passend zum Tempo: 2:30 → 22, 2:00 → 26, 1:45 → 28
+const ghostBaseSpm = () => Math.max(16, Math.min(34, 22 + (150 - ghostBasePace()) / 7.5));
+
+// Der Gegner hat eine eigene Uhr. Er rudert ab deinem ersten Schlag ununterbrochen weiter, auch wenn du pausierst.
+// Sein Tempo schwankt zufällig um das eingestellte Mittel (langsame Zufallsschwankung plus gelegentliche Zwischenspurts),
+// eine sanfte Rückführung sorgt dafür, dass er über ein bis zwei Minuten genau im eingestellten Schnitt liegt.
+ghostStep = () => {
+  if (!s.firstStroke) return;
+  const t = now(), v0 = 500 / ghostBasePace();
+  if (s.ghostD == null){ Object.assign(s, {ghostD: 0, rc: 0, rcLast: t, gE: 0, gV: v0, gPh: 0.15, gNext: 60 + Math.random() * 90, gSurgeEnd: -1, gPlan: 0}); return; }
+  let dt = (t - s.rcLast) / 1000; s.rcLast = t;
+  if (!(dt > 0)) return;
+  dt = Math.min(dt, 3600);
+  const D = s.race && s.race.dist;
+  while (dt > 0){
+    const h = Math.min(dt, 0.1); dt -= h; s.rc += h;
+    if (D && s.ghostD >= D){ s.gV *= Math.exp(-h / 2.5); if (s.gV < 0.05) s.gV = 0; s.ghostD += s.gV * h; continue; }   // im Ziel ausgleiten
+    s.gPlan += v0 * h;
+    s.gE += -s.gE / 25 * h + 0.04 * Math.sqrt(2 * h / 25) * gauss();
+    if (s.rc >= s.gNext){ s.gSurgeEnd = s.rc + 8 + Math.random() * 8; s.gNext = s.rc + 90 + Math.random() * 120; }
+    const surge = s.rc < s.gSurgeEnd ? 0.07 : 0, behind = (s.ghostD - s.gPlan) / v0;   // Sekunden vor oder hinter dem Plan
+    const f = 1 + Math.max(-0.12, Math.min(0.14, s.gE + surge - behind / 40));
+    s.gV += (v0 * f - s.gV) * Math.min(1, h / 1.5);                                // ein Boot ändert sein Tempo nicht schlagartig
+    s.ghostD += s.gV * h;
+    s.gPh += ghostBaseSpm() * (1 + 0.8 * (s.gV / v0 - 1)) / 60 * h;
+  }
+};
+ghostFactor = () => s.gV ? s.gV / (500 / ghostBasePace()) : 1;
+const _ghostMetricR = ghostMetric;
+ghostMetric = d => {
+  const m = _ghostMetricR(d), R = s.race;
+  if (R && R.done) m.sub = R.win ? 'Gewonnen in ' + fmtPace(R.mFin) : 'Ziel in ' + fmtPace(R.mFin) + ' · ' + oppOf().short + ' war ' + fmtSec(R.gap1) + ' schneller';
+  else if (R && R.dist) m.sub += ' · noch ' + fmtDist(Math.max(0, Math.round(R.dist - (s.distShown || 0)))) + ' m';
+  return m;
+};
+const fmtSec = v => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',') + ' s';
+
+// ---------- Ziellinie und Ergebnis ----------
+const _raceStepZ = raceStep;
+raceStep = () => {
+  if (!prefs.on.includes('ghost') || !s.firstStroke || s.ghostD == null) return;
+  const R0 = s.race;
+  if (R0 && R0.done) return;   // Rennen entschieden: Abstand bleibt beim Stand an der Ziellinie
+  _raceStepZ();
+  const R = s.race; if (!R) return;
+  if (R.dist == null) R.dist = ghostCfg.dist || 0;
+  if (!R.dist) return;
+  const O = oppOf(), my = s.distShown || 0;
+  if (!R.sprint2 && R.dist - my <= 100 && R.dist - my > 0 && R.dist >= 300){ R.sprint2 = true; msg('Endspurt! Noch ' + Math.round(R.dist - my) + ' m bis zur Ziellinie.'); whistle(); buzz([80, 60, 80]); }
+  if (R.gFin == null && s.ghostD >= R.dist){
+    R.gFin = s.rc - (s.ghostD - R.dist) / Math.max(0.5, s.gV || 1); R.gapAtG = R.dist - my;
+    if (my < R.dist){ msg(capFirst(O.nom) + ' ist im Ziel! Für dich noch ' + Math.round(R.dist - my) + ' m.'); buzz(400); }
+  }
+  if (my >= R.dist){
+    R.mFin = Math.max(0.1, s.rc - (my - R.dist) / Math.max(0.5, s.speed || 1)); R.done = true;
+    const v0 = 500 / ghostBasePace();
+    R.win = R.gFin == null || R.mFin < R.gFin;
+    R.gap1 = R.win ? (R.gFin != null ? R.gFin - R.mFin : Math.max(0, R.dist - s.ghostD) / Math.max(0.5, s.gV || v0)) : R.mFin - R.gFin;
+    R.gapM = R.win ? Math.max(0, Math.round(R.dist - s.ghostD)) : Math.round(R.gapAtG || 0);
+    R.comeback = R.win && R.maxBack <= -20;
+    if (R.win) showRaceWin(R);
+    else { msg('Im Ziel nach ' + fmtPace(R.mFin) + '. ' + capFirst(O.nom) + ' war ' + fmtSec(R.gap1) + ' schneller. ' + O.passes); buzz(300); }
+  }
+};
+
+// ---------- Siegerehrung ----------
+function victory(){
+  const a = audio(); if (!a) return;
+  let t = a.currentTime + 0.05;
+  // Siegesfanfare: Auftakt, Aufstieg, langer Schlussakkord
+  [[392, .12], [392, .12], [392, .12], [523.3, .42], [392, .14], [523.3, .14], [659.3, .14], [784, .6]].forEach(([f, d]) => { tone(a, f, t, d + .08, 'triangle', 0.17); tone(a, f / 2, t, d + .08, 'sine', 0.05); t += d; });
+  [523.3, 659.3, 784, 1046.5].forEach(f => tone(a, f, t, 1.4, 'triangle', 0.09));
+}
+let confettiRun = 0;
+function confetti(){
+  const c = $('rwConfetti'), g = c.getContext('2d'), dpr = Math.min(2, devicePixelRatio || 1), run = ++confettiRun;
+  const W = c.clientWidth, H = c.clientHeight; c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const cols = ['#f2b24c', '#3fc4c9', '#5be3a0', '#ff8a7a', '#b9a8ff', '#ffffff'];
+  const P = Array.from({length: 140}, () => ({x: Math.random() * W, y: -20 - Math.random() * H * 0.8, vx: (Math.random() - 0.5) * 60, vy: 80 + Math.random() * 120,
+    r: Math.random() * TAU, vr: (Math.random() - 0.5) * 8, w: 6 + Math.random() * 6, h: 3 + Math.random() * 4, c: cols[Math.floor(Math.random() * cols.length)]}));
+  let last = performance.now(), t0 = last;
+  const step = () => {
+    if (run !== confettiRun || $('raceWin').hidden) return;
+    const t = performance.now(), dt = Math.min(0.05, (t - last) / 1000); last = t;
+    g.clearRect(0, 0, W, H);
+    P.forEach(p => {
+      p.vy += 30 * dt; p.x += (p.vx + Math.sin(t / 400 + p.r) * 25) * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      if (p.y > H + 20 && t - t0 < 4500){ p.y = -10; p.x = Math.random() * W; p.vy = 80 + Math.random() * 100; }
+      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 1.7))); g.restore();
+    });
+    if (t - t0 < 9000) requestAnimationFrame(step); else g.clearRect(0, 0, W, H);
+  };
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(step);
+}
+function showRaceWin(R){
+  const O = oppOf();
+  $('rwTitle').textContent = R.gap1 < 1 ? 'Fotofinish!' : 'Sieg!';
+  $('rwSub').innerHTML = 'Du hast <b>' + esc(O.acc) + '</b> über ' + fmtDist(R.dist) + ' m geschlagen.';
+  $('rwStats').innerHTML = '<div><b>' + fmtPace(R.mFin) + '</b><span>deine Zeit</span></div><div><b>+' + fmtSec(R.gap1).replace(' s', '') + ' s</b><span>Vorsprung' + (R.gapM ? ' · ' + R.gapM + ' m' : '') + '</span></div>' +
+    '<div><b>' + fmtPace(R.mFin / R.dist * 500) + '</b><span>Ø pro 500 m</span></div><div><b>' + R.changes + '</b><span>Führungswechsel</span></div>';
+  $('rwQuote').textContent = O.passed + (R.comeback ? ' Was für eine Aufholjagd!' : '');
+  $('rwBadges').textContent = 'Speichere die Einheit danach, damit der Sieg in deinen Erfolgen zählt.';
+  $('raceWin').hidden = false; $('rwClose').focus({preventScroll: true});
+  victory(); buzz([120, 80, 120, 80, 400]); confetti();
+}
+$('rwClose').onclick = () => { $('raceWin').hidden = true; };
+$('raceWin').onclick = e => { if (e.target === $('raceWin')) $('raceWin').hidden = true; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('raceWin').hidden) $('raceWin').hidden = true; });
+
+// ---------- Fließende Darstellung ----------
+// Das Gerät meldet nur einmal pro Sekunde. Die Bahn zeigt darum geglättete Positionen, die mit dem Tempo weiterlaufen,
+// dazu den Vorschub jedes Schlags: Beim Durchzug beschleunigt das Boot, beim Vorrollen läuft es aus.
+function raceVis(started){
+  const t = now(), dt = s.visT != null ? Math.min(0.25, Math.max(0, (t - s.visT) / 1000)) : 0; s.visT = t;
+  const my = s.distShown || 0, moving = s.spmShown > 0 || (s.devTimeUpT != null && t - s.devTimeUpT < 2500);
+  if (s.myVis == null || Math.abs(my - s.myVis) > 25) s.myVis = my;
+  else { s.myVis += (moving ? s.speed || 0 : 0) * dt; s.myVis += (my - s.myVis) * Math.min(1, dt * 2); }
+  s.phMe = (s.phMe || 0) + (moving ? (s.spmShown || 0) : 0) / 60 * dt;
+  const surge = ph => 0.35 * Math.sin(TAU * (ph % 1) - 0.9);
+  return {my: s.myVis + (moving ? surge(s.phMe) : 0), g: started ? s.ghostD + ((s.gV || 0) > 0.3 ? surge(s.gPh || 0) : 0) : 0,
+    phMe: moving && s.spmShown > 0 ? s.phMe % 1 : 0.18, phG: started && (s.gV || 0) > 0.3 ? (s.gPh || 0) % 1 : 0.18};   // 0.18 = Riemen genau quer
+}
+
+
+// ---------- Einstellungen: Renndistanz ----------
+function renderRaceDist(){
+  const d = ghostCfg.dist || 0;
+  document.querySelectorAll('#raceDistSeg [data-rd]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.rd === d)));
+  $('raceDistBox').hidden = !d;
+  $('raceDistVal').textContent = fmtDist(d);
+  $('raceDistNote').textContent = d ? 'Am Ende wartet eine Ziellinie. Wer zuerst drüber ist, gewinnt. Siege bringen dir Abzeichen in den Erfolgen.' : 'Ohne Ziellinie: Ihr rudert, bis du die Einheit beendest. Abzeichen gibt es nur für Rennen mit Ziellinie.';
+}
+const raceDistStep = (d, dir) => dir > 0 ? d + (d < 1000 ? 100 : d < 5000 ? 250 : 500) : d - (d <= 1000 ? 100 : d <= 5000 ? 250 : 500);
+const setRaceDist = d => { ghostCfg.dist = Math.max(0, Math.min(42195, d)); store('ruderGhost', ghostCfg); renderRaceDist(); };
+$('raceDistSeg').onclick = e => { const b = e.target.closest('[data-rd]'); if (b) setRaceDist(+b.dataset.rd); };
+$('raceDistLess').onclick = () => setRaceDist(Math.max(100, raceDistStep(ghostCfg.dist || 1000, -1)));
+$('raceDistMore').onclick = () => setRaceDist(raceDistStep(ghostCfg.dist || 1000, 1));
+const _renderTrainingZ = renderTraining;
+renderTraining = () => { _renderTrainingZ(); try{ renderRaceDist(); }catch(_){} };
+renderRaceDist();
+
+// ---------- Ergebnis speichern ----------
+const _extraSnapZ = extraSnap;
+extraSnap = () => {
+  const o = _extraSnapZ(), R = s.race;
+  if (o.race && R && R.dist){
+    o.race.dist = R.dist;
+    if (R.done) Object.assign(o.race, {win: R.win ? 1 : 0, t: Math.round(R.mFin * 10) / 10, by: Math.round(R.gap1 * 10) / 10, comeback: R.comeback ? 1 : 0, pace: Math.round(ghostBasePace())});
+  }
+  return o;
+};
+
+// ---------- Abzeichen: Geisterrennen ----------
+const _statsZ = stats;
+stats = () => {
+  const S = _statsZ(), beaten = new Set();
+  Object.assign(S, {raceWins: 0, raceLong: 0, raceCome: 0, racePhoto: 0, raceDutch: 0, raceFast: 0});
+  for (const x of logbook){
+    const r = x.race; if (!r || !r.win) continue;
+    S.raceWins++; beaten.add(r.opp);
+    if (r.dist >= 2000) S.raceLong++;
+    if (r.comeback) S.raceCome++;
+    if (r.by < 1) S.racePhoto++;
+    if (r.opp === 'hollaender') S.raceDutch++;
+    if (r.pace && r.pace <= 120) S.raceFast++;
+  }
+  S.raceOpps = beaten.size;
+  return S;
+};
+ICONS.race = '<path d="M5 21V4M5 4h11l-2 3.5 2 3.5H5"/>';
+CAT_COLOR.race = '#b9a8ff';
+CAT_HELP.race = 'Zählt deine Siege im Geisterrennen. Ein Sieg zählt, wenn du in einem Rennen mit Ziellinie vor deinem Gegner über die Linie fährst und die Einheit danach speicherst. Rennen ohne Ziellinie zählen nicht. Die Renndistanz stellst du unter „Training“ → „Rennen“ ein.';
+CATS.splice(CATS.findIndex(c => c[0] === 'collect'), 0, ['race', 'Geisterrennen']);
+BADGES.push(
+  {id: 'rw1', cat: 'race', name: 'Geisterjäger', desc: 'Dein erstes Geisterrennen gewonnen', v: S => S.raceWins, t: 1, f: 'count'},
+  {id: 'rw5', cat: 'race', name: 'Spukbezwinger', desc: '5 Geisterrennen gewonnen', v: S => S.raceWins, t: 5, f: 'count'},
+  {id: 'rw25', cat: 'race', name: 'Schrecken der Geister', desc: '25 Geisterrennen gewonnen', v: S => S.raceWins, t: 25, f: 'count'},
+  {id: 'rwDutch', cat: 'race', name: 'Fluch gebrochen', desc: 'Den Fliegenden Holländer geschlagen', v: S => S.raceDutch, t: 1, f: 'count',
+    help: 'Der Sage nach ist der Fliegende Holländer dazu verdammt, ewig über die Meere zu segeln. Schlag ihn in einem Rennen mit Ziellinie.'},
+  {id: 'rwAll', cat: 'race', name: 'Geisterbanner', desc: 'Alle 10 Gegner mindestens einmal geschlagen', v: S => S.raceOpps, t: 10, f: 'count'},
+  {id: 'rwLong', cat: 'race', name: 'Langstreckengeist', desc: 'Ein Rennen ab 2.000 m gewonnen', v: S => S.raceLong, t: 1, f: 'count'},
+  {id: 'rwCome', cat: 'race', name: 'Aufholjagd', desc: 'Nach mindestens 20 m Rückstand noch gewonnen', v: S => S.raceCome, t: 1, f: 'count'},
+  {id: 'rwPhoto', cat: 'race', name: 'Fotofinish', desc: 'Mit weniger als 1 Sekunde Vorsprung gewonnen', v: S => S.racePhoto, t: 1, f: 'count'},
+  {id: 'rwFast', cat: 'race', name: 'Schneller als der Wind', desc: 'Gegen einen Gegner mit 2:00 /500 m oder schneller gewonnen', v: S => S.raceFast, t: 1, f: 'count'}
+);
+
+// =====================================================================
+// Neue Ordnung: Leiste unten (Rudern, Training, Logbuch, Erfolge), Einstellungen oben rechts
+// =====================================================================
+(() => {
+  const mv = (el, to) => { if (el && to) to.appendChild(el); return el; };
+  const secByTitle = title => [...document.querySelectorAll('#sheet section')].find(s => { const h = s.querySelector('h3'); return h && h.textContent.trim() === title; });
+  const unhide = el => { if (el){ el.hidden = false; el.removeAttribute('data-tab'); } return el; };
+
+  // Zahnrad oben rechts statt „Werte“
+  const gear = $('settingsBtn');
+  gear.className = 'iconBtn'; gear.setAttribute('aria-label', 'Einstellungen');
+  gear.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/><circle cx="12" cy="12" r="6.3"/></svg>';
+  document.querySelector('header .headRight').appendChild(gear);
+
+  // ---------- Training: alle Trainingsarten an einem Ort ----------
+  const cards = [
+    {id: 'free', icon: '🌊', title: 'Frei rudern', sub: () => 'Ohne Ziel, Rennen oder Programm einfach losrudern'},
+    {id: 'goal', icon: '🎯', title: 'Ziel', sec: unhide(secByTitle('Ziel')), sub: () => goal ? 'Aktiv: ' + goalName() : 'Distanz oder Zeit vorgeben'},
+    {id: 'race', icon: '👻', title: 'Rennen', sec: unhide(secByTitle('Geisterboot')), sub: () => prefs.on.includes('ghost') ? 'Aktiv: gegen ' + oppOf().acc + (ghostCfg.dist ? ' über ' + fmtDist(ghostCfg.dist) + ' m' : ', offen') : 'Gegen einen Gegner auf der Rennbahn'},
+    {id: 'raid', icon: '🏴‍☠️', title: 'Kaperfahrt', sec: unhide(secByTitle('Kaperfahrten')), sub: () => activeMission ? 'Aktiv: ' + MISSIONS.find(m => m.id === activeMission.id).name : 'Geführtes Intervalltraining'},
+    {id: 'boss', icon: '🐙', title: 'Boss-Kampf', sec: unhide(secByTitle('Boss-Kämpfe')), sub: () => activeBoss ? 'Aktiv: ' + BOSSI[activeBoss.id].name : 'Seemonster mit deiner Kraft besiegen'},
+    {id: 'tact', icon: '🎵', title: 'Taktgefühl', sec: unhide(secByTitle('Taktgefühl')), sub: () => prefs.on.includes('tact') ? 'Aktiv: ' + tactCfg.min + ' bis ' + tactCfg.max + ' Schläge pro Minute' : 'Gleichmäßige Schlagzahl halten'}
+  ];
+  const box = $('tCards');
+  cards.forEach(c => {
+    const d = document.createElement('details'); d.className = 'tCard'; d.dataset.card = c.id;
+    d.innerHTML = '<summary><span class="tI" aria-hidden="true">' + c.icon + '</span><span class="tT"><b>' + c.title + '</b><span class="tS"></span></span><span class="tA" aria-hidden="true">›</span></summary><div class="tBody"></div>';
+    const body = d.querySelector('.tBody');
+    if (c.sec){ const h = c.sec.querySelector('h3'); if (h) h.hidden = true; mv(c.sec, body); }
+    if (c.id === 'free') body.innerHTML = '<p class="note left">Beendet eine laufende Kaperfahrt oder einen Boss-Kampf und entfernt das Ziel. Rennbahn und Taktgefühl bleiben, wie sie sind.</p><button type="button" class="primary" id="freeBtn">Frei rudern</button>';
+    c.el = d; box.appendChild(d);
+  });
+  // Immer nur eine Karte offen
+  box.addEventListener('toggle', e => { if (e.target.open) box.querySelectorAll('details.tCard[open]').forEach(x => { if (x !== e.target) x.open = false; }); }, true);
+  const trainSubs = () => cards.forEach(c => { const el = c.el.querySelector('.tS'); const v = c.sub(); if (el.textContent !== v) el.textContent = v; c.el.classList.toggle('on', /^Aktiv/.test(v)); });
+  $('freeBtn').onclick = () => {
+    if (activeMission){ activeMission = null; renderMissionBar(); }
+    if (activeBoss){ activeBoss = null; renderBossBar(); }
+    const none = document.querySelector('#tCards [data-card="goal"] [data-g=""]'); if (none) none.click();
+    showView('row'); msg('Frei rudern: Leg einfach los.');
+  };
+
+  // ---------- Logbuch: Kalender, Statistik, Entwicklung, Ruhmeshalle ----------
+  const log = $('logBody');
+  mv($('achStats'), log); mv(document.querySelector('#achSheet section.cal'), log); mv($('trendSec'), log); mv($('hallSec'), log);
+
+  // ---------- Einstellungen: klare Gruppen statt Reitern ----------
+  const tabs = $('setTabs'); if (tabs) tabs.remove();
+  const inner = document.querySelector('#sheet .sheetInner');
+  const groups = [
+    {t: 'Anzeige beim Rudern', d: 'Welche Werte auf welchem Bildschirm stehen', secs: [secByTitle('Angezeigte Werte')]},
+    {t: 'Profil', d: 'Geschlecht, Alter, Gewicht, Maximalpuls', secs: [secByTitle('Profil')]},
+    {t: 'Rudergerät und Pulsmesser', d: 'Pulsmesser verbinden', secs: [secByTitle('Puls')]},
+    {t: 'Bewegungssensor', d: 'Schläge mit dem Handy zählen', secs: [secByTitle('Schläge per Bewegungssensor')]},
+    {t: 'Töne und Vibration', d: 'Signale beim Rudern', secs: [secByTitle('Töne')]},
+    {t: 'Daten sichern und übertragen', d: 'Sicherung, Export und Import', secs: [$('ioBox'), [...document.querySelectorAll('#achSheet details')].find(x => /Daten sichern/.test(x.querySelector('summary').textContent))]},
+    {t: 'App installieren', d: 'Auf den Startbildschirm legen', secs: [secByTitle('App installieren')]},
+    {t: 'Hilfe und Fehlersuche', d: 'Verbindungsdaten, Protokoll, Sensor-Test, Demo', secs: [$('diagBox'), secByTitle('Sensor-Test: Schläge per Bewegung'), secByTitle('Ausprobieren')]}
+  ];
+  const list = document.createElement('div'); list.className = 'setGroups';
+  groups.forEach(g => {
+    const d = document.createElement('details'); d.className = 'tCard setGroup';
+    d.innerHTML = '<summary><span class="tT"><b>' + g.t + '</b><span class="tS">' + g.d + '</span></span><span class="tA" aria-hidden="true">›</span></summary><div class="tBody"></div>';
+    const body = d.querySelector('.tBody');
+    g.secs.filter(Boolean).forEach(s => { unhide(s); const h = s.querySelector(':scope > h3'); if (h && g.secs.length === 1) h.hidden = true; if (s.tagName === 'DETAILS' && g.secs.length === 1) s.open = true; mv(s, body); });
+    list.appendChild(d);
+  });
+  inner.appendChild(list);
+  list.addEventListener('toggle', e => { if (e.target.open && e.target.classList.contains('setGroup')) list.querySelectorAll('details.setGroup[open]').forEach(x => { if (x !== e.target) x.open = false; }); }, true);
+  // Reste (falls noch etwas übrig ist) unten anhängen, damit nichts verloren geht
+  [...inner.querySelectorAll(':scope > section, :scope > details:not(.setGroup)')].forEach(s => { unhide(s); });
+  showSetTab = () => {};
+  const _os = openSettings; openSettings = () => { ["trainSheet","logSheet","achSheet","shopSheet","reviewSheet"].forEach(id => $(id).hidden = true); _os(); };
+
+  // ---------- Leiste unten ----------
+  const SHEETS = {train: 'trainSheet', log: 'logSheet', ach: 'achSheet'};
+  const ALL = ['sheet', 'trainSheet', 'logSheet', 'achSheet', 'shopSheet', 'reviewSheet'];
+  window.showView = v => {
+    ALL.forEach(id => { if (SHEETS[v] !== id) $(id).hidden = true; });
+    if (v === 'train'){ renderTraining(); trainSubs(); }
+    if (v === 'log' || v === 'ach') renderAch();
+    if (SHEETS[v]){ $(SHEETS[v]).hidden = false; $(SHEETS[v]).scrollTop = 0; }
+    markNav();
+  };
+  function markNav(){
+    const open = ALL.find(id => !$(id).hidden), cur = open === 'trainSheet' ? 'train' : open === 'logSheet' ? 'log' : open === 'achSheet' ? 'ach' : open ? '' : 'row';
+    $('tabbar').querySelectorAll('[data-view]').forEach(b => b.toggleAttribute('aria-current', b.dataset.view === cur));
+  }
+  $('tabbar').onclick = e => { const b = e.target.closest('[data-view]'); if (b) showView(b.dataset.view); };
+  new MutationObserver(markNav).observe(document.body, {subtree: true, attributes: true, attributeFilter: ['hidden']});
+  $('closeTrain').onclick = () => showView('row');
+  $('closeLog').onclick = () => showView('row');
+  // Trainingsarten, die starten, schließen auch das Training-Blatt
+  const _cs = closeSettings; closeSettings = () => { _cs(); $('trainSheet').hidden = true; };
+  setInterval(() => { if (!$('trainSheet').hidden) trainSubs(); }, 1000);
+  ['click', 'input', 'change'].forEach(ev => box.addEventListener(ev, () => setTimeout(trainSubs, 0)));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && (!$('trainSheet').hidden || !$('logSheet').hidden)) showView('row'); });
+  markNav();
+})();
 
 checkBadges();
 </script>

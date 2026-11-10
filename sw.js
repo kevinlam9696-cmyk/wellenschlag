@@ -1,7 +1,7 @@
 // Wellenschlag: Offline-Betrieb.
 // Die App selbst wird zuerst aus dem Netz geladen (so kommen Updates sofort an) und nur ohne Netz aus dem Speicher.
 // Schriften und Symbole kommen zuerst aus dem Speicher.
-const CACHE = 'wellenschlag-v9';
+const CACHE = 'wellenschlag-v17';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

@@ -1695,23 +1695,31 @@ function onRowerData(e){
 }
 
 // GATT-Verbindung aufbauen; Android meldet beim ersten Versuch oft "GATT operation failed", daher bis zu 3 Versuche
+// Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
+// wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
+let gattStep = '';
+function within(ms, step, pr){
+  gattStep = step;
+  return Promise.race([pr, new Promise((_, no) => setTimeout(() => { const e = new Error(step + ': keine Antwort nach ' + ms / 1000 + ' s'); e.name = 'TimeoutError'; no(e); }, ms))]);
+}
 async function openGatt(fresh){
   let err;
   for (let k = 0; k < 3; k++){
     try{
       if (rowerChar){ rowerChar.removeEventListener('characteristicvaluechanged', onRowerData); rowerChar = null; }
-      const server = device.gatt.connected ? device.gatt : await device.gatt.connect();
-      const svc = await server.getPrimaryService(FTMS);
-      rowerChar = await svc.getCharacteristic(ROWER_DATA);
+      setStatus('Verbinde …' + (k ? ' (Versuch ' + (k + 1) + ' von 3)' : ''));
+      const server = device.gatt.connected ? device.gatt : await within(10000, 'Verbindung aufbauen', device.gatt.connect());
+      const svc = await within(10000, 'Fitness-Dienst suchen', server.getPrimaryService(FTMS));
+      rowerChar = await within(8000, 'Ruderdaten finden', svc.getCharacteristic(ROWER_DATA));
       rowerChar.addEventListener('characteristicvaluechanged', onRowerData);
-      await rowerChar.startNotifications();
+      await within(8000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
       s.lastPacketT = now();
-      await startSession(svc, fresh);
+      await within(12000, 'Training starten', startSession(svc, fresh)).catch(e => { sessionState = 'Start-Befehl ohne Antwort (' + e.message + ')'; });
       return;
     }catch(e){
       err = e; lastError = e.name + ': ' + e.message;
       try{ device.gatt.disconnect(); }catch(_){}
-      await sleep(800 * (k + 1));
+      await sleep(1000 * (k + 1));
     }
   }
   throw err;
@@ -1746,7 +1754,8 @@ async function connect(){
   }catch(e){
     lastError = e.name + ': ' + e.message;
     setStatus('Nicht verbunden');
-    if (e.name === 'NotFoundError') msg('Kein Gerät gefunden oder gewählt. Weck den Trainingscomputer auf (kurz rudern) und schließe Kinomap oder andere Apps, die mit dem Gerät verbunden sind.', true);
+    if (e.name === 'TimeoutError') msg('Das Rudergerät antwortet nicht (hängt bei „' + gattStep + '“). Meist ist schon etwas anderes damit verbunden: Garmin-Uhr, Kinomap oder eine andere Ruder-App. Trenne es dort oder schalte deren Bluetooth kurz aus. Hilft das nicht: Bluetooth am Handy aus und an, Rudergerät kurz vom Strom nehmen, dann erneut „Verbinden“.', true);
+    else if (e.name === 'NotFoundError') msg('Kein Gerät gefunden oder gewählt. Weck den Trainingscomputer auf (kurz rudern) und schließe Kinomap oder andere Apps, die mit dem Gerät verbunden sind.', true);
     else msg('Verbindung fehlgeschlagen. Rudere kurz, damit der Trainingscomputer wach ist, und tippe erneut auf „Verbinden“. Hilft das nicht: Bluetooth am Handy aus- und wieder einschalten.', true);
   }
 }

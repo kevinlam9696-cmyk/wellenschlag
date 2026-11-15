@@ -1566,10 +1566,10 @@ function onCpReply(e){
 }
 async function startSession(svc, fresh){
   try{
-    const cp = await svc.getCharacteristic(CONTROL_POINT);
+    const cp = await svc.getCharacteristic(CONTROL_POINT); connNote('Steuerkanal gefunden');
     cp.removeEventListener('characteristicvaluechanged', onCpReply);
     cp.addEventListener('characteristicvaluechanged', onCpReply);
-    await cp.startNotifications();
+    await cp.startNotifications(); connNote('Steuerkanal abonniert');
     controlChar = cp;
     const write = bytes => cp.writeValueWithResponse ? cp.writeValueWithResponse(new Uint8Array(bytes)) : cp.writeValue(new Uint8Array(bytes));
     try{
@@ -1581,7 +1581,7 @@ async function startSession(svc, fresh){
     sessionState = 'Start gesendet, keine Antwort';
     await write([0x00]); await sleep(400);
     if (fresh){ await write([0x01]); await sleep(400); }         // Reset nur bei neuem Training
-    await write([0x07]);
+    await write([0x07]); connNote('Start-Befehle gesendet');
     lastResumeT = now();
   }catch(e){
     sessionState = 'Gerät unterstützt keinen Start-Befehl (' + e.name + ')';
@@ -1653,7 +1653,7 @@ async function probe(){
 // Ein Text mit allem: Verbindungsdaten + Protokoll
 function reportText(){
   const rows = [...document.querySelectorAll('.diag dt')].map(dt => dt.textContent + ': ' + dt.nextElementSibling.textContent);
-  return 'Wellenschlag Protokoll\n' + rows.join('\n') + '\n\n' + ($('probeLog').value || '(noch keine Daten)');
+  return 'Wellenschlag Protokoll (Version ' + APP_VERSION + ')\n' + rows.join('\n') + '\n\nVerbindungsablauf:\n' + (connLog.length ? connLog.join('\n') : '(noch kein Verbindungsversuch)') + '\n\n' + ($('probeLog').value || '(noch keine Daten)');
 }
 function flash(btn, text){
   const old = btn.dataset.label || (btn.dataset.label = btn.textContent);
@@ -1689,29 +1689,50 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 function onRowerData(e){
   const dv = e.target.value;
   s.raw = hex(dv);
+  if (!s.firstPacketNoted){ s.firstPacketNoted = true; connNote('Erstes Datenpaket: ' + s.raw); }
   logLine('Ruderdaten', dv, true);
   try{ onPacket(parseRower(dv)); }
   catch(err){ lastError = 'Paket nicht lesbar: ' + err.message; }   // ein kaputtes Paket darf die App nicht anhalten
 }
 
 // GATT-Verbindung aufbauen; Android meldet beim ersten Versuch oft "GATT operation failed", daher bis zu 3 Versuche
+// Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
+// wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
+let gattStep = '';
+const APP_VERSION = '15.11.2026 b';
+// Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
+const connLog = [];
+function connNote(text){
+  const d = new Date(), hh = n => String(n).padStart(2, '0');
+  connLog.push(hh(d.getHours()) + ':' + hh(d.getMinutes()) + ':' + hh(d.getSeconds()) + ' ' + text);
+  if (connLog.length > 60) connLog.shift();
+  try{ logLine('Info', text); }catch(_){}
+}
+function within(ms, step, pr){
+  gattStep = step; const t0 = Date.now(); connNote(step + ' …');
+  let timer;
+  return Promise.race([pr.then(v => { connNote(step + ' ok (' + (Date.now() - t0) + ' ms)'); return v; }, e => { connNote(step + ' Fehler: ' + e.name + ' ' + e.message); throw e; }),
+    new Promise((_, no) => { timer = setTimeout(() => { const e = new Error(step + ': keine Antwort nach ' + ms / 1000 + ' s'); e.name = 'TimeoutError'; connNote(step + ': keine Antwort nach ' + ms / 1000 + ' s'); no(e); }, ms); })])
+    .finally(() => clearTimeout(timer));
+}
 async function openGatt(fresh){
   let err;
   for (let k = 0; k < 3; k++){
     try{
       if (rowerChar){ rowerChar.removeEventListener('characteristicvaluechanged', onRowerData); rowerChar = null; }
-      const server = device.gatt.connected ? device.gatt : await device.gatt.connect();
-      const svc = await server.getPrimaryService(FTMS);
-      rowerChar = await svc.getCharacteristic(ROWER_DATA);
+      setStatus('Verbinde …' + (k ? ' (Versuch ' + (k + 1) + ' von 3)' : ''));
+      const server = device.gatt.connected ? device.gatt : await within(10000, 'Verbindung aufbauen', device.gatt.connect());
+      const svc = await within(10000, 'Fitness-Dienst suchen', server.getPrimaryService(FTMS));
+      rowerChar = await within(8000, 'Ruderdaten finden', svc.getCharacteristic(ROWER_DATA));
       rowerChar.addEventListener('characteristicvaluechanged', onRowerData);
-      await rowerChar.startNotifications();
+      await within(8000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
       s.lastPacketT = now();
-      await startSession(svc, fresh);
+      await within(12000, 'Training starten', startSession(svc, fresh)).catch(e => { sessionState = 'Start-Befehl ohne Antwort (' + e.message + ')'; });
       return;
     }catch(e){
       err = e; lastError = e.name + ': ' + e.message;
       try{ device.gatt.disconnect(); }catch(_){}
-      await sleep(800 * (k + 1));
+      await sleep(1000 * (k + 1));
     }
   }
   throw err;
@@ -1731,7 +1752,10 @@ async function connect(){
   stopDemo();
   try{
     setStatus('Suche …');
+    connNote('Version ' + APP_VERSION + ': Geräteauswahl geöffnet');
     const picked = await navigator.bluetooth.requestDevice({ filters:[{services:[FTMS]}], optionalServices:[FTMS, ...EXTRA_SERVICES] });
+    connNote('Gewählt: ' + (picked.name || 'ohne Namen') + (picked.gatt.connected ? ' (war schon verbunden)' : ''));
+    s.firstPacketNoted = false;
     if (device && device !== picked) device.removeEventListener('gattserverdisconnected', onDisconnect);
     if (device !== picked) picked.addEventListener('gattserverdisconnected', onDisconnect);
     device = picked;
@@ -1740,13 +1764,14 @@ async function connect(){
     if (!worth(snapshot())){ base = {strokes:0, dist:0, rawStrokes:null, rawDist:null}; s = freshState(); }
     await openGatt(true);
     wantConnected = true;
-    showConnected();
+    showConnected(); connNote('Verbunden, warte auf Daten');
     msg('Los geht’s. Die Zeit startet mit dem ersten Schlag und pausiert, wenn du 6 Sekunden aufhörst.');
     keepAwake();
   }catch(e){
-    lastError = e.name + ': ' + e.message;
+    lastError = e.name + ': ' + e.message; connNote('Abbruch: ' + lastError);
     setStatus('Nicht verbunden');
-    if (e.name === 'NotFoundError') msg('Kein Gerät gefunden oder gewählt. Weck den Trainingscomputer auf (kurz rudern) und schließe Kinomap oder andere Apps, die mit dem Gerät verbunden sind.', true);
+    if (e.name === 'TimeoutError') msg('Das Rudergerät antwortet nicht (hängt bei „' + gattStep + '“). Meist ist schon etwas anderes damit verbunden: Garmin-Uhr, Kinomap oder eine andere Ruder-App. Trenne es dort oder schalte deren Bluetooth kurz aus. Hilft das nicht: Bluetooth am Handy aus und an, Rudergerät kurz vom Strom nehmen, dann erneut „Verbinden“.', true);
+    else if (e.name === 'NotFoundError') msg('Kein Gerät gefunden oder gewählt. Weck den Trainingscomputer auf (kurz rudern) und schließe Kinomap oder andere Apps, die mit dem Gerät verbunden sind.', true);
     else msg('Verbindung fehlgeschlagen. Rudere kurz, damit der Trainingscomputer wach ist, und tippe erneut auf „Verbinden“. Hilft das nicht: Bluetooth am Handy aus- und wieder einschalten.', true);
   }
 }

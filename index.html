@@ -1699,7 +1699,7 @@ function onRowerData(e){
 // Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
 // wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
 let gattStep = '';
-const APP_VERSION = '15.11.2026 b';
+const APP_VERSION = '16.11.2026 b';
 // Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
 const connLog = [];
 function connNote(text){
@@ -1715,24 +1715,37 @@ function within(ms, step, pr){
     new Promise((_, no) => { timer = setTimeout(() => { const e = new Error(step + ': keine Antwort nach ' + ms / 1000 + ' s'); e.name = 'TimeoutError'; connNote(step + ': keine Antwort nach ' + ms / 1000 + ' s'); no(e); }, ms); })])
     .finally(() => clearTimeout(timer));
 }
-async function openGatt(fresh){
+// Nur ein Verbindungsversuch gleichzeitig: Ein neuer Tipp auf „Verbinden“ bricht den laufenden ab.
+// Zwei parallele Versuche haben sich sonst gegenseitig die Verbindung gekappt.
+let connGen = 0, connecting = false;
+const aborted = () => { const e = new Error('abgebrochen'); e.name = 'AbortError'; return e; };
+async function openGatt(fresh, gen){
   let err;
-  for (let k = 0; k < 3; k++){
+  const chk = () => { if (gen != null && gen !== connGen) throw aborted(); };
+  const N = 5;                                           // Abonnieren hängt bei deinem Gerät manchmal: mehrere frische Anläufe
+  for (let k = 0; k < N; k++){
     try{
+      chk();
       if (rowerChar){ rowerChar.removeEventListener('characteristicvaluechanged', onRowerData); rowerChar = null; }
-      setStatus('Verbinde …' + (k ? ' (Versuch ' + (k + 1) + ' von 3)' : ''));
+      setStatus('Verbinde …' + (k ? ' (Versuch ' + (k + 1) + ' von ' + N + ')' : ''));
       const server = device.gatt.connected ? device.gatt : await within(10000, 'Verbindung aufbauen', device.gatt.connect());
+      chk();
       const svc = await within(10000, 'Fitness-Dienst suchen', server.getPrimaryService(FTMS));
+      chk();
       rowerChar = await within(8000, 'Ruderdaten finden', svc.getCharacteristic(ROWER_DATA));
+      chk();
       rowerChar.addEventListener('characteristicvaluechanged', onRowerData);
-      await within(8000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
+      await sleep(k ? 1500 : 800); chk();                  // Gerät nach der Dienstsuche kurz zur Ruhe kommen lassen
+      await within(7000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
+      chk();
       s.lastPacketT = now();
       await within(12000, 'Training starten', startSession(svc, fresh)).catch(e => { sessionState = 'Start-Befehl ohne Antwort (' + e.message + ')'; });
       return;
     }catch(e){
+      if (e.name === 'AbortError' || (gen != null && gen !== connGen)) throw aborted();   // veralteter Versuch: nichts mehr anfassen
       err = e; lastError = e.name + ': ' + e.message;
       try{ device.gatt.disconnect(); }catch(_){}
-      await sleep(1000 * (k + 1));
+      if (k < N - 1) await sleep(Math.min(5000, 2000 + 1000 * k));   // genug Pause, damit Android die alte Verbindung wirklich abbaut
     }
   }
   throw err;
@@ -1750,11 +1763,20 @@ async function connect(){
     return;
   }
   stopDemo();
+  if (connecting){                                       // läuft noch ein Versuch? Den beenden wir sauber
+    connGen++; connNote('Alter Versuch abgebrochen');
+    try{ device && device.gatt.disconnect(); }catch(_){}
+    await sleep(800);
+  }
+  const gen = ++connGen; connecting = true;
   try{
     setStatus('Suche …');
     connNote('Version ' + APP_VERSION + ': Geräteauswahl geöffnet');
     const picked = await navigator.bluetooth.requestDevice({ filters:[{services:[FTMS]}], optionalServices:[FTMS, ...EXTRA_SERVICES] });
     connNote('Gewählt: ' + (picked.name || 'ohne Namen') + (picked.gatt.connected ? ' (war schon verbunden)' : ''));
+    if (gen !== connGen) throw aborted();
+    // Eine alte, hängende Verbindung blockiert Android: lieber sauber trennen und frisch verbinden
+    if (picked.gatt.connected){ try{ picked.gatt.disconnect(); }catch(_){} connNote('Alte Verbindung getrennt'); await sleep(1200); }
     s.firstPacketNoted = false;
     if (device && device !== picked) device.removeEventListener('gattserverdisconnected', onDisconnect);
     if (device !== picked) picked.addEventListener('gattserverdisconnected', onDisconnect);
@@ -1762,17 +1784,20 @@ async function connect(){
     setStatus('Verbinde …');
     // Läuft schon eine Einheit (z. B. nach einem Verbindungsabbruch), geht sie einfach weiter
     if (!worth(snapshot())){ base = {strokes:0, dist:0, rawStrokes:null, rawDist:null}; s = freshState(); }
-    await openGatt(true);
+    await openGatt(true, gen);
     wantConnected = true;
     showConnected(); connNote('Verbunden, warte auf Daten');
     msg('Los geht’s. Die Zeit startet mit dem ersten Schlag und pausiert, wenn du 6 Sekunden aufhörst.');
     keepAwake();
   }catch(e){
+    if (e.name === 'AbortError') return;                // ein neuerer Versuch hat übernommen
     lastError = e.name + ': ' + e.message; connNote('Abbruch: ' + lastError);
     setStatus('Nicht verbunden');
     if (e.name === 'TimeoutError') msg('Das Rudergerät antwortet nicht (hängt bei „' + gattStep + '“). Meist ist schon etwas anderes damit verbunden: Garmin-Uhr, Kinomap oder eine andere Ruder-App. Trenne es dort oder schalte deren Bluetooth kurz aus. Hilft das nicht: Bluetooth am Handy aus und an, Rudergerät kurz vom Strom nehmen, dann erneut „Verbinden“.', true);
     else if (e.name === 'NotFoundError') msg('Kein Gerät gefunden oder gewählt. Weck den Trainingscomputer auf (kurz rudern) und schließe Kinomap oder andere Apps, die mit dem Gerät verbunden sind.', true);
     else msg('Verbindung fehlgeschlagen. Rudere kurz, damit der Trainingscomputer wach ist, und tippe erneut auf „Verbinden“. Hilft das nicht: Bluetooth am Handy aus- und wieder einschalten.', true);
+  }finally{
+    if (gen === connGen) connecting = false;
   }
 }
 
@@ -1788,6 +1813,7 @@ function showDisconnected(text){
 
 // Unerwarteter Abbruch → automatisch neu verbinden, Training läuft weiter
 function onDisconnect(){
+  if (connecting) return;                                // Trennung gehört zum laufenden Verbindungsversuch
   if (!wantConnected){ showDisconnected('Getrennt. Deine Werte bleiben stehen, bis du zurücksetzt.'); return; }
   reconnect();
 }

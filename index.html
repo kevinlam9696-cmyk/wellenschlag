@@ -93,9 +93,16 @@ button:focus-visible,summary:focus-visible,select:focus-visible,input:focus-visi
 .mlist label{flex:1;display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0;font-weight:500}
 .mlist input{width:22px;height:22px;accent-color:var(--water);margin:0;flex:none}
 .mlist li.off label span{color:var(--muted)}
-.mlist .pos{font:600 12px var(--ui);color:var(--muted);min-width:5.5em;text-align:right;font-variant-numeric:tabular-nums}
-.mlist .mv{width:40px;height:40px;padding:0;font-size:18px;line-height:1;flex:none}
+.mlist .pos{font:600 13px var(--ui);color:var(--muted);min-width:2.6em;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mlist .pos i{font-style:normal;margin-right:3px;opacity:.7}
+.mlist .mv{width:36px;height:36px;padding:0;font-size:17px;line-height:1;flex:none}
 .mlist .mv:disabled{opacity:.3;cursor:default}
+.mlist li{position:relative;background:var(--panel)}
+.mlist .grip{flex:none;width:30px;height:44px;margin-left:-8px;display:grid;place-items:center;cursor:grab;touch-action:none;color:var(--muted)}
+.mlist .grip svg{width:12px;height:20px;fill:currentColor}
+.mlist li.drag{z-index:2;box-shadow:0 6px 22px rgba(0,0,0,.35);border-radius:10px;outline:2px solid var(--water);transition:none}
+.mlist li.drag .grip{cursor:grabbing;color:var(--water)}
+.mlist.dragging{overflow:visible;user-select:none;-webkit-user-select:none}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
 .seg button{border:0;border-radius:0;background:none;padding:12px 8px}
 .seg button + button{border-left:1px solid var(--line)}
@@ -299,7 +306,7 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .missionBar.hard .mbMain b{color:var(--flame)}
 .missionBar.won .mbMain b{color:var(--ok)}
 .mbT{font-variant-numeric:tabular-nums;color:var(--fg)}
-.mbSub{font-size:12px;color:var(--muted)}
+.mbSub{font-size:15px;line-height:1.3;font-weight:500;color:color-mix(in srgb,var(--fg) 82%,var(--muted))}
 .missionBar .bar{width:100%}
 .missionBar.hard .bar i{background:var(--flame)}
 .missionBar button{padding:8px 12px;font-size:13px;flex:none}
@@ -388,8 +395,8 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .bossBar.won .bossPic{animation:none;opacity:.35;transform:rotate(12deg) translateY(10px)}
 .bbMain{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .bbTop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.bbTop .label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bbHp{white-space:nowrap;flex:none;font:600 13px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.bbTop .label{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bbHp{white-space:nowrap;flex:none;font:600 14px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
 .hpBar{position:relative;height:10px;border-radius:5px;background:var(--line);overflow:hidden}
 .hpBar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--paint),var(--monster));border-radius:5px;transition:width .3s}
 .hpBar s{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--bg);opacity:.8}
@@ -397,7 +404,7 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .bossBar.warn .bbMain b,.bossBar.rage .bbMain b{color:var(--flame)}
 .bossBar.won .bbMain b,.bossBar.hit .bbMain b{color:var(--ok)}
 .bossBar.heal .bbMain b{color:var(--warn)}
-.bbSub{font-size:12px;color:var(--muted)}
+.bbSub{font-size:15px;line-height:1.3;font-weight:500;color:color-mix(in srgb,var(--fg) 82%,var(--muted))}
 .rageGauge{position:relative;height:14px;border-radius:7px;background:var(--line);overflow:hidden}
 .rageGauge i{position:absolute;inset:0 auto 0 0;background:var(--flame);transition:width .25s}
 .rageGauge.ok i{background:var(--ok)}
@@ -523,6 +530,30 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 @keyframes rwPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes rwBob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 @media (prefers-reduced-motion:reduce){.rwCard,.rwCup{animation:none}}
+#msg{font-size:15px;line-height:1.35;color:color-mix(in srgb,var(--fg) 80%,var(--muted));font-weight:500}
+/* Trainingsmodus-Bildschirm */
+.modeScreen{display:flex;flex-direction:column;gap:12px;justify-content:center;overflow-y:auto;padding:2px 0}
+.modeScreen > .missionBar,.modeScreen > .bossBar{flex:1 1 auto;max-height:100%;flex-direction:column;align-items:stretch;justify-content:center;gap:16px;padding:20px 18px;border-width:2px;border-radius:20px}
+.modeScreen .bbPic{width:auto;align-self:center}
+.modeScreen .bossPic{width:min(56vw,230px);height:auto;aspect-ratio:76/64}
+.modeScreen .bbMain{gap:10px;text-align:center}
+.modeScreen .bbTop{flex-direction:column;align-items:center;gap:6px}
+.modeScreen .bbTop .label{font-size:16px;white-space:normal}
+.modeScreen .bbHp{font-size:20px}
+.modeScreen .hpBar{height:18px;border-radius:9px}
+.modeScreen .bbMain b{font-size:clamp(34px,10vw,52px)}
+.modeScreen .bbSub,.modeScreen .mbSub{font-size:19px;line-height:1.35}
+.modeScreen .rageGauge{height:24px;border-radius:12px}
+.modeScreen #bbStop{width:40px;height:40px;font-size:24px;top:10px;right:10px}
+.modeScreen .mbMain{gap:12px;text-align:center}
+.modeScreen .mbMain .label{font-size:16px}
+.modeScreen .mbMain b{font-size:clamp(32px,9.5vw,58px);line-height:1.05;overflow-wrap:anywhere}
+.modeScreen .mbMain b .mbT{display:block;font-size:1.35em;margin-top:6px}
+.modeScreen .mbMain,.modeScreen .bbMain{flex:0 0 auto}
+.modeScreen .missionBar .bar{height:16px}
+.modeScreen .missionBar button{align-self:center;padding:12px 22px;font-size:15px}
+.modeHint{margin:0;text-align:center;font-size:14px;color:var(--muted)}
+.dots .modeDot{border-radius:3px}
 /* Neue Ordnung */
 :root{--navH:64px}
 .app{padding-bottom:calc(var(--navH) + 10px + env(safe-area-inset-bottom,0px))}
@@ -641,7 +672,7 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 
     <section data-tab="train" hidden>
       <h3>Angezeigte Werte</h3>
-      <p class="note" style="text-align:left;align-self:stretch">Je zwei eingeschaltete Werte ergeben einen Bildschirm. Mit den Pfeilen legst du die Reihenfolge fest.</p>
+      <p class="note" style="text-align:left;align-self:stretch">Je zwei eingeschaltete Werte ergeben einen Bildschirm. Halte den Griff ⠿ links gedrückt und zieh einen Wert an die gewünschte Stelle. Die Pfeile gehen auch.</p>
       <ul class="mlist" id="mlist"></ul>
     </section>
 
@@ -1505,19 +1536,57 @@ function renderMetrics(V){
   }
 }
 
+// Ziehen und Ablegen am Griff links. Funktioniert mit Finger und Maus (Pointer-Events, nicht das HTML-Drag-and-Drop,
+// das auf Android-Touch nicht geht). Die Pfeile bleiben für Tastatur und Bildschirmleser.
+function dragRow(grip, li, ul){
+  grip.onpointerdown = e => {
+    if (e.button > 0) return;
+    e.preventDefault();
+    try{ grip.setPointerCapture(e.pointerId); }catch(_){}
+    const sc = $('sheet');
+    let startY = e.clientY, lastY = e.clientY, scroll0 = sc.scrollTop, raf = 0, moved = false;
+    li.classList.add('drag'); ul.classList.add('dragging'); try{ navigator.vibrate && navigator.vibrate(12); }catch(_){}
+    const place = () => {
+      li.style.transform = 'translateY(' + (lastY - startY + sc.scrollTop - scroll0) + 'px)';
+      const r = li.getBoundingClientRect(), mid = (r.top + r.bottom) / 2;
+      const prev = li.previousElementSibling, next = li.nextElementSibling, o0 = li.offsetTop;
+      if (prev && mid < prev.getBoundingClientRect().top + prev.offsetHeight / 2) ul.insertBefore(li, prev);
+      else if (next && mid > next.getBoundingClientRect().top + next.offsetHeight / 2) ul.insertBefore(next, li);
+      else return;
+      moved = true;
+      startY += li.offsetTop - o0;                          // Zeile bleibt unter dem Finger
+      li.style.transform = 'translateY(' + (lastY - startY + sc.scrollTop - scroll0) + 'px)';
+      try{ navigator.vibrate && navigator.vibrate(6); }catch(_){}
+    };
+    const edge = () => {                                     // am Rand automatisch weiterscrollen
+      const h = innerHeight, d = lastY < 90 ? -(90 - lastY) / 6 : lastY > h - 120 ? (lastY - (h - 120)) / 6 : 0;
+      if (d){ sc.scrollTop += d; place(); }
+      raf = requestAnimationFrame(edge);
+    };
+    raf = requestAnimationFrame(edge);
+    grip.onpointermove = ev => { lastY = ev.clientY; place(); };
+    grip.onpointerup = grip.onpointercancel = () => {
+      cancelAnimationFrame(raf); grip.onpointermove = grip.onpointerup = grip.onpointercancel = null;
+      li.style.transform = ''; li.classList.remove('drag'); ul.classList.remove('dragging');
+      const order = [...ul.children].map(x => x.dataset.id);
+      if (moved && order.join() !== prefs.order.join()){ prefs.order = order; savePrefs(); buildScreens(); }
+      buildList();
+    };
+  };
+}
 // Einstellungsliste: Ein/Aus und Reihenfolge
 function buildList(focusId, focusDir){
   const ul = $('mlist'); ul.textContent = '';
   const vis = visibleIds();
   prefs.order.forEach((id, i) => {
     const on = prefs.on.includes(id), li = document.createElement('li');
-    li.className = on ? '' : 'off';
+    li.className = on ? '' : 'off'; li.dataset.id = id;
     const vi = vis.indexOf(id);
-    li.innerHTML = '<label><input type="checkbox" id="m_' + id + '"' + (on ? ' checked' : '') + '><span></span></label>' +
-      '<span class="pos">' + (on ? 'Bildschirm ' + (Math.floor(vi / 2) + 1) : '') + '</span>' +
+    li.innerHTML = '<span class="grip" aria-hidden="true" title="Ziehen zum Verschieben"><svg viewBox="0 0 12 20"><circle cx="3" cy="4" r="1.6"/><circle cx="9" cy="4" r="1.6"/><circle cx="3" cy="10" r="1.6"/><circle cx="9" cy="10" r="1.6"/><circle cx="3" cy="16" r="1.6"/><circle cx="9" cy="16" r="1.6"/></svg></span><label><input type="checkbox" id="m_' + id + '"' + (on ? ' checked' : '') + '><span></span></label>' +
+      '<span class="pos"' + (on ? ' title="Bildschirm ' + (Math.floor(vi / 2) + 1) + '"' : '') + '>' + (on ? '<i aria-hidden="true">▭</i>' + (Math.floor(vi / 2) + 1) : '') + '</span>' +
       '<button type="button" class="mv" data-d="-1" aria-label="' + MDEF[id].name + ' nach oben"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
       '<button type="button" class="mv" data-d="1" aria-label="' + MDEF[id].name + ' nach unten"' + (i === prefs.order.length - 1 ? ' disabled' : '') + '>↓</button>';
-    li.querySelector('span').textContent = MDEF[id].name;
+    li.querySelector('label span').textContent = MDEF[id].name;
     li.querySelector('input').onchange = e => {
       prefs.on = e.target.checked ? [...prefs.on, id] : prefs.on.filter(x => x !== id);
       savePrefs(); buildList(id); buildScreens();
@@ -1528,6 +1597,7 @@ function buildList(focusId, focusDir){
       [prefs.order[i], prefs.order[j]] = [prefs.order[j], prefs.order[i]];
       savePrefs(); buildList(id, dir); buildScreens();
     });
+    dragRow(li.querySelector('.grip'), li, ul);
     ul.appendChild(li);
   });
   if (focusId){
@@ -1699,7 +1769,7 @@ function onRowerData(e){
 // Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
 // wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
 let gattStep = '';
-const APP_VERSION = '21.11.2026 b';
+const APP_VERSION = '22.11.2026 c';
 // Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
 const connLog = [];
 function connNote(text){
@@ -1752,12 +1822,13 @@ const aborted = () => { const e = new Error('abgebrochen'); e.name = 'AbortError
 async function openGatt(fresh, gen){
   let err;
   const chk = () => { if (gen != null && gen !== connGen) throw aborted(); };
-  const N = 5;                                           // Abonnieren hängt bei deinem Gerät manchmal: mehrere frische Anläufe
+  const N = 8;                                           // Abonnieren hängt bei deinem Gerät oft: viele frische Anläufe
   for (let k = 0; k < N; k++){
     try{
       chk();
       if (rowerChar){ rowerChar.removeEventListener('characteristicvaluechanged', onRowerData); rowerChar = null; }
       setStatus('Verbinde …' + (k ? ' (Versuch ' + (k + 1) + ' von ' + N + ')' : ''));
+      if (k === 2) msg('Das Rudergerät ist heute zickig. Ich versuche es weiter, bitte warten …');
       const server = device.gatt.connected ? device.gatt : await within(10000, 'Verbindung aufbauen', device.gatt.connect());
       chk();
       const svc = await within(10000, 'Fitness-Dienst suchen', server.getPrimaryService(FTMS));
@@ -1766,26 +1837,12 @@ async function openGatt(fresh, gen){
       chk();
       rowerChar.addEventListener('characteristicvaluechanged', onRowerData);
       if (k === 0){ const pr = rowerChar.properties; connNote('Ruderdaten-Kanal kann: ' + ['read', 'notify', 'indicate', 'write'].filter(x => pr[x]).join(', ')); }
-      // Verschiedene Wege ausprobieren, jeder Anlauf etwas anders, damit das Protokoll zeigt, was hilft
-      const plan = ['normal', 'erst lesen', 'sofort', 'lange warten', 'abfragen'][k];
-      connNote('Anlauf ' + (k + 1) + ': ' + plan);
-      if (plan === 'normal') await sleep(800);
-      if (plan === 'lange warten') await sleep(5000);
-      if (plan === 'erst lesen'){
-        const fc = await within(5000, 'Gerätemerkmale finden', svc.getCharacteristic(0x2acc));
-        const fv = await within(5000, 'Gerätemerkmale lesen', fc.readValue()); connNote('Merkmale: ' + hex(fv));
-        const st = await within(5000, 'Statuskanal finden', svc.getCharacteristic(0x2ada));
-        await within(5000, 'Statuskanal abonnieren', st.startNotifications());
-      }
+      // Dein Gerät (Android 10) beantwortet die erste Anfrage nach dem Verbinden oft gar nicht. Eine echte Antwort kommt
+      // in unter 0,1 s, darum kurze Frist und lieber viele frische Anläufe.
+      connNote('Anlauf ' + (k + 1) + ' von ' + N);
+      if (k % 2 === 0) await sleep(300);
       chk();
-      if (plan === 'abfragen' && rowerChar.properties.read){
-        // Letzter Ausweg: Werte jede Sekunde abfragen statt abonnieren
-        const v = await within(5000, 'Ruderdaten lesen', rowerChar.readValue());
-        connNote('Abfragen klappt: ' + hex(v) + '. Werte werden jetzt jede Sekunde abgefragt.');
-        startPolling(rowerChar);
-      } else {
-        await within(7000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
-      }
+      await within(4000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
       chk();
       s.lastPacketT = now();
       await within(12000, 'Training starten', startSession(svc, fresh)).catch(e => { sessionState = 'Start-Befehl ohne Antwort (' + e.message + ')'; });
@@ -1794,7 +1851,8 @@ async function openGatt(fresh, gen){
       if (e.name === 'AbortError' || (gen != null && gen !== connGen)) throw aborted();   // veralteter Versuch: nichts mehr anfassen
       err = e; lastError = e.name + ': ' + e.message;
       try{ device.gatt.disconnect(); }catch(_){}
-      if (k < N - 1) await sleep(Math.min(5000, 2000 + 1000 * k));   // genug Pause, damit Android die alte Verbindung wirklich abbaut
+      // Android hält die alte Verbindung noch etwa 4–5 s offen. Erst danach wird wirklich neu verbunden, und das hilft.
+      if (k < N - 1) await sleep(5500);
     }
   }
   throw err;
@@ -5523,12 +5581,12 @@ function renderRace(m){
 const _buildScreensR = buildScreens;
 buildScreens = () => {
   _buildScreensR();
-  const ids = visibleIds();
-  if (!ids.includes('ghost')) return;
-  // Neu gruppieren: Geisterboot allein, der Rest paarweise
+  const ids = visibleIds(), SOLO = ['ghost', 'tact'];
+  if (!ids.some(id => SOLO.includes(id))) return;
+  // Neu gruppieren: Rennbahn und Taktgefühl jeweils allein, der Rest paarweise
   const pager = $('pager'), old = mounted.slice(); pager.textContent = ''; mounted = [];
   const groups = []; let buf = [];
-  ids.forEach(id => { if (id === 'ghost'){ if (buf.length) groups.push(buf), buf = []; groups.push(['ghost']); } else { buf.push(id); if (buf.length === 2) groups.push(buf), buf = []; } });
+  ids.forEach(id => { if (SOLO.includes(id)){ if (buf.length) groups.push(buf), buf = []; groups.push([id]); } else { buf.push(id); if (buf.length === 2) groups.push(buf), buf = []; } });
   if (buf.length) groups.push(buf);
   groups.forEach((grp, si) => {
     const sc = document.createElement('section'); sc.className = 'screen'; sc.style.setProperty('--rows', grp.length);
@@ -5895,6 +5953,48 @@ BADGES.push(
   {id: 'rwPhoto', cat: 'race', name: 'Fotofinish', desc: 'Mit weniger als 1 Sekunde Vorsprung gewonnen', v: S => S.racePhoto, t: 1, f: 'count'},
   {id: 'rwFast', cat: 'race', name: 'Schneller als der Wind', desc: 'Gegen einen Gegner mit 2:00 /500 m oder schneller gewonnen', v: S => S.raceFast, t: 1, f: 'count'}
 );
+
+// =====================================================================
+// Trainingsmodus auf eigenem Bildschirm: Kaperfahrt und Boss-Kampf erscheinen groß als erster Bildschirm,
+// die übrigen Werte liegen daneben zum Hinwischen.
+// =====================================================================
+(() => {
+  const home = document.createElement('div'); home.id = 'modeHome'; home.style.display = 'contents';
+  $('missionBar').before(home); home.append($('missionBar'), $('bossBar'));
+  const modeOn = () => !!(activeMission || activeBoss);
+  const _bsMode = buildScreens;
+  const mb = $('missionBar'), bb = $('bossBar');
+  buildScreens = () => {
+    home.append(mb, bb);                                  // erst in Sicherheit bringen, der Neubau leert den Pager
+    _bsMode();
+    const pager = $('pager');
+    if (!modeOn()) return;
+    pager.querySelectorAll('.screen.empty').forEach(e => e.remove());
+    const sc = document.createElement('section'); sc.className = 'screen modeScreen';
+    sc.setAttribute('aria-label', activeBoss && activeMission ? 'Kaperfahrt und Boss-Kampf' : activeBoss ? 'Boss-Kampf' : 'Kaperfahrt');
+    sc.append(mb, bb);
+    if (pager.children.length) sc.insertAdjacentHTML('beforeend', '<p class="modeHint">Wische für deine Werte ›</p>');
+    pager.prepend(sc);
+    const n = pager.children.length, dots = $('dots'); dots.textContent = '';
+    [...pager.children].forEach((x, i) => x.setAttribute('aria-label', (i ? 'Bildschirm ' + (i + 1) : x.getAttribute('aria-label').split(' · ')[0] + ' · Bildschirm 1') + ' von ' + n));
+    if (n > 1) for (let i = 0; i < n; i++){ const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', i ? 'Bildschirm ' + (i + 1) : 'Trainingsmodus'); if (!i) b.className = 'modeDot'; b.onclick = () => goTo(i); dots.appendChild(b); }
+    page = Math.min(page, n - 1); pager.scrollLeft = page * pager.clientWidth; markDot();
+  };
+  // Modus an oder aus? Dann Bildschirme neu bauen und beim Start direkt zum Modus springen
+  let was = modeOn();
+  const _dfMode = drawFrame;
+  drawFrame = () => {
+    _dfMode();
+    const on = modeOn();
+    if (on !== was){
+      was = on;
+      if (!on) page = Math.max(0, page - 1);
+      buildScreens();
+      if (on){ page = 0; $('pager').scrollLeft = 0; markDot(); }
+    }
+  };
+  if (was) buildScreens();
+})();
 
 // =====================================================================
 // Neue Ordnung: Leiste unten (Rudern, Training, Logbuch, Erfolge), Einstellungen oben rechts

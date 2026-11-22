@@ -535,7 +535,7 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .modeScreen{display:flex;flex-direction:column;gap:12px;justify-content:center;overflow-y:auto;padding:2px 0}
 .modeScreen > .missionBar,.modeScreen > .bossBar{flex:1 1 auto;max-height:100%;flex-direction:column;align-items:stretch;justify-content:center;gap:16px;padding:20px 18px;border-width:2px;border-radius:20px}
 .modeScreen .bbPic{width:auto;align-self:center}
-.modeScreen .bossPic{width:min(56vw,230px);height:auto;aspect-ratio:76/64}
+.modeScreen .bossPic{width:min(42vw,170px);height:auto;aspect-ratio:76/64}
 .modeScreen .bbMain{gap:10px;text-align:center}
 .modeScreen .bbTop{flex-direction:column;align-items:center;gap:6px}
 .modeScreen .bbTop .label{font-size:16px;white-space:normal}
@@ -556,6 +556,19 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .dots .modeDot{border-radius:3px}
 .verLine{margin:6px 0 0;text-align:center;font-size:14px;color:var(--muted)}
 .verLine b{color:var(--fg);font-weight:600}
+.steadyGauge{position:relative;height:16px;border-radius:8px;background:var(--line);margin-top:2px}
+.steadyGauge[hidden]{display:none}
+.steadyGauge .sgBand{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--ok) 45%,transparent);border-radius:4px}
+.steadyGauge.on .sgBand{background:var(--ok)}
+.steadyGauge .sgMark{position:absolute;top:-4px;bottom:-4px;width:4px;margin-left:-2px;border-radius:2px;background:var(--fg);transition:left .4s}
+.steadyGauge .sgL,.steadyGauge .sgR{position:absolute;top:18px;font-size:11px;color:var(--muted)}
+.steadyGauge .sgL{left:0}.steadyGauge .sgR{right:0}
+.steadyGauge{margin-bottom:14px}
+.modeScreen .steadyGauge{height:24px;border-radius:12px}
+.modeScreen .steadyGauge .sgL,.modeScreen .steadyGauge .sgR{top:28px;font-size:13px}
+.modeScreen .steadyGauge{margin-bottom:22px}
+.bossBar.steady{border-color:var(--ok)}
+.bossBar.steady .bbMain b{color:var(--ok)}
 /* Neue Ordnung */
 :root{--navH:64px}
 .app{padding-bottom:calc(var(--navH) + 10px + env(safe-area-inset-bottom,0px))}
@@ -781,7 +794,7 @@ button.danger{color:var(--warn);border-color:var(--warn)}
     <section data-tab="game" hidden>
       <h3>Boss-Kämpfe</h3>
       <p class="note left">Kämpfe gegen Seemonster aus den Sagen der Welt.</p>
-      <details class="howTo"><summary>So funktionieren die Kämpfe</summary><p class="note left" style="margin:6px 0 0">Deine abgegebene Energie zieht ihnen Lebenspunkte ab (1 kJ = 1 Lebenspunkt). <b>Phase 1:</b> In den ersten 2 Minuten ermittelt die App deine Basis-Pace. Bleibst du danach gleichmäßig in dieser Pace (±12 %), richtest du 25 % mehr Schaden an. <b>Phase 2, Rage Mode:</b> Bei bestimmten Lebenspunkten brüllt das Monster und kündigt 5 Sekunden vorher seinen Spezialangriff an. Bring dann 30 Sekunden lang im Schnitt mindestens 30 % mehr Leistung als deine Basis. Gelingt das, wehrst du den Angriff ab und triffst das Monster hart (−8 % Lebenspunkte, +10 Muscheln). Sonst heilt es sich um 12 %. Jeder Sieg schaltet das nächste, stärkere Monster frei.</p></details>
+      <details class="howTo"><summary>So funktionieren die Kämpfe</summary><p class="note left" style="margin:6px 0 0">Deine abgegebene Energie zieht ihnen Lebenspunkte ab (1 kJ = 1 Lebenspunkt). <b>Phase 1:</b> In den ersten 2 Minuten ermittelt die App deine Basis-Pace. Bleibt dein Schnitt der letzten 15 Sekunden danach nahe an dieser Basis (±15 %), richtest du 25 % mehr Schaden an. Kurze Ausreißer bis 20 % verzeiht die App für 3 Sekunden. Der grüne Bereich im Balken zeigt dir, wo du liegen musst. <b>Phase 2, Rage Mode:</b> Bei bestimmten Lebenspunkten brüllt das Monster und kündigt 5 Sekunden vorher seinen Spezialangriff an. Bring dann 30 Sekunden lang im Schnitt mindestens 30 % mehr Leistung als deine Basis. Gelingt das, wehrst du den Angriff ab und triffst das Monster hart (−8 % Lebenspunkte, +10 Muscheln). Sonst heilt es sich um 12 %. Jeder Sieg schaltet das nächste, stärkere Monster frei.</p></details>
       <div class="shopList" id="bossList"></div>
     </section>
 
@@ -1771,7 +1784,7 @@ function onRowerData(e){
 // Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
 // wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
 let gattStep = '';
-const APP_VERSION = '22.11.2026 d';
+const APP_VERSION = '22.11.2026 g';
 // Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
 const connLog = [];
 function connNote(text){
@@ -3328,18 +3341,23 @@ const buzz = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(_){
 // ---------- Taktgefühl ----------
 let tactCfg = {min: 22, max: 26, ...load('ruderTact', {})};
 const tactMult = c => c >= 80 ? 5 : c >= 60 ? 4 : c >= 40 ? 3 : c >= 20 ? 2 : 1;
-const _newStrokeT = newStroke;
-newStroke = (ts, dist) => {
-  _newStrokeT(ts, dist);
+// Bewertet einen Schlag. Quelle: Bewegungssensor, wenn er läuft (zählt jeden Schlag), sonst der Zähler des Geräts.
+function tactJudge(n){
   try{
     const T = s.tact || (s.tact = {combo: 0, best: 0, inRange: 0, points: 0, miss: 0});
-    if (s.strokeTimes.length < 3) return;                     // erst ab dem 3. Schlag ist die Frequenz verlässlich
+    if (n < 3) return;                                        // erst ab dem 3. Schlag ist die Frequenz verlässlich
     const spm = bestSpm()[0];
     if (!spm) return;
     if (spm >= tactCfg.min && spm <= tactCfg.max){
       T.combo++; T.inRange++; T.miss = 0; T.points += tactMult(T.combo); T.best = Math.max(T.best, T.combo);
     } else if (++T.miss >= 2){ T.combo = 0; }                  // ein einzelner Ausrutscher ist erlaubt
   }catch(_){}
+}
+const _newStrokeT = newStroke;
+newStroke = (ts, dist) => {
+  _newStrokeT(ts, dist);
+  if (typeof motActive === 'function' && motActive()) return; // Sensor läuft: der zählt die Schläge
+  tactJudge(s.strokeTimes.length);
 };
 function tactMetric(){
   const T = s.tact || {combo: 0, best: 0, inRange: 0};
@@ -4195,7 +4213,7 @@ function startBoss(id){
   const B = BOSSI[id];
   const moon = wxToday().id === 'vollmond', maxJ = Math.round(B.hp * 1000 * (moon ? 1.2 : 1));
   activeBoss = {id, moon, maxJ, at: s.activeMs, E0: s.energyJ, lastE: s.energyJ, hp: maxJ, phase: 'base', fired: [], lastRage: -1e9,
-    baseW: 0, win: [], blocked: 0, failed: 0, beep: -1, flash: null};
+    baseW: 0, win: [], blocked: 0, failed: 0, beep: -1, flash: null, D0: s.distShown || 0, dwin: [], steadyS: 0};
   closeSettings();
   msg('Kampf gegen ' + theB(B, false, true) + '! Rudere 2 Minuten in deiner Wohlfühl-Pace. Daraus ermittelt die App deine Basis-Pace.');
   buildBossBar(); renderTraining();
@@ -4218,6 +4236,7 @@ function blockSound(){ const a = audio(); if (!a) return; let t = a.currentTime;
 function failSound(){ const a = audio(); if (!a) return; const t = a.currentTime; tone(a, 220, t, .35, 'sawtooth', .07); tone(a, 165, t + .3, .6, 'sawtooth', .07); }
 
 // ---------- Kampfablauf, einmal pro Bild ----------
+const STEADY_WIN_S = 15, STEADY_IN = 0.15, STEADY_OUT = 0.20;
 function bossStep(){
   const A = activeBoss; if (!A || A.phase === 'won') return;
   const B = BOSSI[A.id], max = A.maxJ || B.hp * 1000;
@@ -4229,10 +4248,25 @@ function bossStep(){
   const span = t - A.win[0][0];
   A.nowW = span >= 2 ? (s.energyJ - A.win[0][1]) / span : 0;
   // Schaden
+  // Gleichmäßigkeit: nicht über die zappelige 5-Sekunden-Leistung, sondern über den Schnitt der letzten 15 Sekunden.
+  if (!A.win15) A.win15 = [];
+  A.win15.push([t, s.energyJ]);
+  while (A.win15.length > 2 && t - A.win15[0][0] > STEADY_WIN_S) A.win15.shift();
+  const sSpan = t - A.win15[0][0];
+  A.smoothW = sSpan >= 6 ? (s.energyJ - A.win15[0][1]) / sSpan : null;
   let mult = 1;
-  A.steady = false;
-  if (A.phase === 'rage') mult = 1.5;
-  else if (A.phase === 'fight' && A.baseW && Math.abs(A.nowW - A.baseW) <= A.baseW * 0.12){ mult = 1.25; A.steady = true; }
+  if (A.phase === 'rage'){ mult = 1.5; A.steady = false; }
+  else if (A.phase === 'fight' && A.baseW){
+    A.dev = A.smoothW != null ? A.smoothW / A.baseW - 1 : null;
+    const dev = A.dev != null ? Math.abs(A.dev) : 1;
+    // Hysterese und Schonfrist: Rein ab ±15 %, raus erst ab ±20 % und erst nach 3 s außerhalb
+    if (dev <= STEADY_IN) A.offAt = null;
+    if (!A.steady && dev <= STEADY_IN){ A.steady = true; A.steadyFrom = t; }
+    else if (A.steady && dev > STEADY_OUT){ if (A.offAt == null) A.offAt = t; else if (t - A.offAt >= 3){ A.steady = false; A.offAt = null; } }
+    else if (A.steady) A.offAt = null;
+    if (A.steady){ mult = 1.25; A.steadyS = (A.steadyS || 0) + Math.max(0, t - (A.lastT ?? t)); }
+  } else A.steady = false;
+  A.lastT = t;
   if (dE > 0) A.hp -= dE * mult;                               // Lebenspunkte in Joule, Anzeige in kJ
   const pending = B.rage.length - A.fired.length;
   const floor = (pending > 0 || A.phase === 'warn' || A.phase === 'rage') ? max * 0.02 : 0;
@@ -4313,8 +4347,9 @@ function renderBossBar(){
   } else if (A.phase === 'fight'){
     ph = fl ? (fl.ok ? 'Abgewehrt!' : 'Geheilt!') : A.steady ? 'Gleichmäßig ×1,25' : 'Kampf';
     if (fl) cls += fl.ok ? ' hit' : ' heal';
-    const nx = B.rage.length - A.fired.length;
-    sub = 'Basis ' + Math.round(A.baseW) + ' W · gerade ' + Math.round(A.nowW || 0) + ' W' + (nx ? ' · noch ' + nx + (nx === 1 ? ' Spezialangriff' : ' Spezialangriffe') : '');
+    if (A.steady && !fl) cls += ' steady';
+    const nx = B.rage.length - A.fired.length, tgt = A.baseW;
+    sub = (A.steady ? 'Gleichmäßig seit ' + fmtTime(Math.floor(t - A.steadyFrom)) + ' · ' : '') + 'Ziel ' + Math.round(tgt) + ' W · Ø 15 s ' + (A.smoothW != null ? Math.round(A.smoothW) : '–') + ' W' + (nx ? ' · noch ' + nx + (nx === 1 ? ' Spezialangriff' : ' Spezialangriffe') : '');
   } else if (A.phase === 'warn'){
     ph = B.atk + '! <span class="mbT">' + Math.max(1, Math.ceil(BOSS_WARN_S - (t - A.warnAt))) + '</span>';
     sub = 'Achtung! Gleich 30 Sekunden mindestens ' + rageNeed(A.baseW) + ' W';
@@ -4328,6 +4363,16 @@ function renderBossBar(){
   $('bbHp').textContent = (Math.ceil(A.hp / 100) / 10).toLocaleString('de-DE', {minimumFractionDigits: 1}) + ' / ' + Math.round(max / 1000) + ' kJ';
   $('bbHpI').style.width = (A.hp / max * 100).toFixed(1) + '%';
   $('bbPhase').innerHTML = ph; $('bbSub').textContent = sub;
+  // Gleichmäßigkeits-Anzeige: Band = Bonusbereich, Strich = dein 15-s-Tempo
+  let sg = $('bbSteady');
+  if (!sg){ $('bbSub').insertAdjacentHTML('afterend', '<div class="steadyGauge" id="bbSteady" aria-hidden="true"><span class="sgBand"></span><span class="sgMark"></span><span class="sgL">langsamer</span><span class="sgR">schneller</span></div>'); sg = $('bbSteady'); }
+  sg.hidden = !(A.phase === 'fight' && A.baseW);
+  if (!sg.hidden){
+    const range = 0.45, pos = A.dev == null ? 0.5 : Math.min(1, Math.max(0, 0.5 + A.dev / (2 * range)));
+    sg.querySelector('.sgBand').style.cssText = 'left:' + (50 - STEADY_IN / (2 * range) * 100) + '%;width:' + (STEADY_IN / range * 100) + '%';
+    sg.querySelector('.sgMark').style.left = (pos * 100).toFixed(1) + '%';
+    sg.classList.toggle('on', !!A.steady);
+  }
   const g = $('bbGauge');
   g.hidden = A.phase !== 'rage';
   if (A.phase === 'rage'){
@@ -5731,6 +5776,8 @@ async function motLiveStart(fromGesture){
   setTimeout(() => motStatus(), 2500);
 }
 const motActive = () => !!(motLive && performance.now() - motLive.lastEv < 2000);
+const _motAddStrokeT = motAddStroke;
+motAddStroke = ts => { _motAddStrokeT(ts); tactJudge((s.motTimes || []).length); };
 function motStatus(err){
   const el = $('motLiveNote'); if (!el) return;
   el.textContent = err || (motActive() ? 'Aktiv: Schläge und Schlagzahl kommen vom Bewegungssensor des Handys. Das Handy muss dafür fest in der Halterung stecken.'

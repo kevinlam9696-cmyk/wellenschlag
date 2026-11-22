@@ -554,6 +554,8 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .modeScreen .missionBar button{align-self:center;padding:12px 22px;font-size:15px}
 .modeHint{margin:0;text-align:center;font-size:14px;color:var(--muted)}
 .dots .modeDot{border-radius:3px}
+.verLine{margin:6px 0 0;text-align:center;font-size:14px;color:var(--muted)}
+.verLine b{color:var(--fg);font-weight:600}
 /* Neue Ordnung */
 :root{--navH:64px}
 .app{padding-bottom:calc(var(--navH) + 10px + env(safe-area-inset-bottom,0px))}
@@ -1769,7 +1771,7 @@ function onRowerData(e){
 // Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
 // wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
 let gattStep = '';
-const APP_VERSION = '22.11.2026 c';
+const APP_VERSION = '22.11.2026 d';
 // Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
 const connLog = [];
 function connNote(text){
@@ -6064,6 +6066,7 @@ BADGES.push(
     list.appendChild(d);
   });
   inner.appendChild(list);
+  inner.insertAdjacentHTML('beforeend', '<p class="verLine" id="verLine"><b>Wellenschlag</b> · Version ' + APP_VERSION + '</p>');
   list.addEventListener('toggle', e => { if (e.target.open && e.target.classList.contains('setGroup')) list.querySelectorAll('details.setGroup[open]').forEach(x => { if (x !== e.target) x.open = false; }); }, true);
   // Reste (falls noch etwas übrig ist) unten anhängen, damit nichts verloren geht
   [...inner.querySelectorAll(':scope > section, :scope > details:not(.setGroup)')].forEach(s => { unhide(s); });

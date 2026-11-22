@@ -1699,7 +1699,7 @@ function onRowerData(e){
 // Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
 // wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
 let gattStep = '';
-const APP_VERSION = '16.11.2026 b';
+const APP_VERSION = '21.11.2026 b';
 // Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
 const connLog = [];
 function connNote(text){
@@ -1717,7 +1717,37 @@ function within(ms, step, pr){
 }
 // Nur ein Verbindungsversuch gleichzeitig: Ein neuer Tipp auf „Verbinden“ bricht den laufenden ab.
 // Zwei parallele Versuche haben sich sonst gegenseitig die Verbindung gekappt.
-let connGen = 0, connecting = false;
+let connGen = 0, connecting = false, pollTimer = null;
+function startPolling(ch){
+  clearInterval(pollTimer); let busy = false;
+  pollTimer = setInterval(async () => {
+    if (busy) return;
+    if (!device || !device.gatt.connected || ch !== rowerChar){ clearInterval(pollTimer); pollTimer = null; return; }
+    busy = true;
+    try{ const v = await ch.readValue(); onRowerData({target: {value: v}}); }catch(_){}
+    busy = false;
+  }, 1000);
+}
+// Ist Wellenschlag noch in einem zweiten Fenster offen (installierte App und Chrome-Tab), hält jenes die Verbindung
+// zum Rudergerät fest und blockiert das Anmelden für die Ruderdaten. Darum bittet die App andere Fenster, loszulassen.
+const wsChan = (() => { try{ return new BroadcastChannel('wellenschlag'); }catch(_){ return null; } })();
+let releasedBy = 0;
+if (wsChan) wsChan.onmessage = e => {
+  const m = e.data || {};
+  if (m.t === 'release' && device && (device.gatt.connected || wantConnected || connecting)){
+    connGen++; wantConnected = false; connecting = false;
+    try{ device.gatt.disconnect(); }catch(_){}
+    showDisconnected('Getrennt, weil Wellenschlag in einem anderen Fenster verbindet.');
+    wsChan.postMessage({t: 'released'});
+  }
+  if (m.t === 'released') releasedBy++;
+};
+async function releaseOthers(){
+  if (!wsChan) return;
+  releasedBy = 0; wsChan.postMessage({t: 'release'});
+  await sleep(400);
+  if (releasedBy){ connNote('Anderes Wellenschlag-Fenster war verbunden, dort getrennt'); await sleep(1500); }
+}
 const aborted = () => { const e = new Error('abgebrochen'); e.name = 'AbortError'; return e; };
 async function openGatt(fresh, gen){
   let err;
@@ -1735,8 +1765,27 @@ async function openGatt(fresh, gen){
       rowerChar = await within(8000, 'Ruderdaten finden', svc.getCharacteristic(ROWER_DATA));
       chk();
       rowerChar.addEventListener('characteristicvaluechanged', onRowerData);
-      await sleep(k ? 1500 : 800); chk();                  // Gerät nach der Dienstsuche kurz zur Ruhe kommen lassen
-      await within(7000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
+      if (k === 0){ const pr = rowerChar.properties; connNote('Ruderdaten-Kanal kann: ' + ['read', 'notify', 'indicate', 'write'].filter(x => pr[x]).join(', ')); }
+      // Verschiedene Wege ausprobieren, jeder Anlauf etwas anders, damit das Protokoll zeigt, was hilft
+      const plan = ['normal', 'erst lesen', 'sofort', 'lange warten', 'abfragen'][k];
+      connNote('Anlauf ' + (k + 1) + ': ' + plan);
+      if (plan === 'normal') await sleep(800);
+      if (plan === 'lange warten') await sleep(5000);
+      if (plan === 'erst lesen'){
+        const fc = await within(5000, 'Gerätemerkmale finden', svc.getCharacteristic(0x2acc));
+        const fv = await within(5000, 'Gerätemerkmale lesen', fc.readValue()); connNote('Merkmale: ' + hex(fv));
+        const st = await within(5000, 'Statuskanal finden', svc.getCharacteristic(0x2ada));
+        await within(5000, 'Statuskanal abonnieren', st.startNotifications());
+      }
+      chk();
+      if (plan === 'abfragen' && rowerChar.properties.read){
+        // Letzter Ausweg: Werte jede Sekunde abfragen statt abonnieren
+        const v = await within(5000, 'Ruderdaten lesen', rowerChar.readValue());
+        connNote('Abfragen klappt: ' + hex(v) + '. Werte werden jetzt jede Sekunde abgefragt.');
+        startPolling(rowerChar);
+      } else {
+        await within(7000, 'Ruderdaten abonnieren', rowerChar.startNotifications());
+      }
       chk();
       s.lastPacketT = now();
       await within(12000, 'Training starten', startSession(svc, fresh)).catch(e => { sessionState = 'Start-Befehl ohne Antwort (' + e.message + ')'; });
@@ -1770,8 +1819,10 @@ async function connect(){
   }
   const gen = ++connGen; connecting = true;
   try{
+    await releaseOthers();
     setStatus('Suche …');
     connNote('Version ' + APP_VERSION + ': Geräteauswahl geöffnet');
+    const ua = navigator.userAgent.match(/Android [\d.]+|Chrome\/[\d.]+/g); if (ua) connNote('System: ' + ua.join(', '));
     const picked = await navigator.bluetooth.requestDevice({ filters:[{services:[FTMS]}], optionalServices:[FTMS, ...EXTRA_SERVICES] });
     connNote('Gewählt: ' + (picked.name || 'ohne Namen') + (picked.gatt.connected ? ' (war schon verbunden)' : ''));
     if (gen !== connGen) throw aborted();
@@ -1793,7 +1844,7 @@ async function connect(){
     if (e.name === 'AbortError') return;                // ein neuerer Versuch hat übernommen
     lastError = e.name + ': ' + e.message; connNote('Abbruch: ' + lastError);
     setStatus('Nicht verbunden');
-    if (e.name === 'TimeoutError') msg('Das Rudergerät antwortet nicht (hängt bei „' + gattStep + '“). Meist ist schon etwas anderes damit verbunden: Garmin-Uhr, Kinomap oder eine andere Ruder-App. Trenne es dort oder schalte deren Bluetooth kurz aus. Hilft das nicht: Bluetooth am Handy aus und an, Rudergerät kurz vom Strom nehmen, dann erneut „Verbinden“.', true);
+    if (e.name === 'TimeoutError') msg('Das Rudergerät antwortet nicht (hängt bei „' + gattStep + '“). Meist hält etwas anderes die Verbindung fest. Schließe andere Apps, die das Gerät nutzen (Garmin Connect, Kinomap, Hersteller-App) und weitere Wellenschlag-Fenster. Hilft das nicht: Handy neu starten und das Rudergerät kurz vom Strom nehmen.', true);
     else if (e.name === 'NotFoundError') msg('Kein Gerät gefunden oder gewählt. Weck den Trainingscomputer auf (kurz rudern) und schließe Kinomap oder andere Apps, die mit dem Gerät verbunden sind.', true);
     else msg('Verbindung fehlgeschlagen. Rudere kurz, damit der Trainingscomputer wach ist, und tippe erneut auf „Verbinden“. Hilft das nicht: Bluetooth am Handy aus- und wieder einschalten.', true);
   }finally{

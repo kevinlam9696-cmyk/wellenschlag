@@ -579,6 +579,39 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .missionBar.onTarget .mbSub{color:var(--ok)}
 .missionBar.below .mbSub{color:var(--warn)}
 .modeScreen .mbDots i{width:14px;height:14px}
+.boatPick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.boatPick button{padding:7px 11px;font-size:13px;border-radius:999px}
+.boatPick button small{font-size:11px;color:var(--muted);font-weight:600}
+.boatPick button[aria-pressed="true"]{background:var(--water);color:var(--bg);border-color:var(--water)}
+.boatPick button[aria-pressed="true"] small{color:inherit;opacity:.85}
+.harbor figure{position:relative}
+.hbN{position:absolute;top:6px;right:8px;font:700 13px var(--num);color:var(--gold)}
+button.danger{background:var(--warn);border-color:var(--warn);color:#fff}
+#donateSec button,#burnBtn{align-self:flex-start}
+#harborSec{gap:10px}
+.harbor figure.ship{cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.harbor figure.ship.sel{outline:2px solid var(--water);outline-offset:1px}
+.harbor figure.ship.worn svg{filter:saturate(.55) sepia(.25)}
+.shShield{position:absolute;top:6px;left:8px;font-size:15px}
+.shShield small{font-size:10px;font-weight:700;color:var(--muted);margin-left:1px}
+.shWarn{position:absolute;top:6px;right:8px;font-size:15px}
+.cond{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.cond i{display:block;height:100%;border-radius:3px;background:var(--ok)}
+.cond.mid i{background:var(--gold)}
+.cond.bad i{background:var(--warn)}
+.shipDetail{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:12px}
+.shipDetail[hidden]{display:none}
+.sdHead{display:flex;flex-direction:column;gap:2px}
+.sdHead b{font-size:17px}
+.shipParts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.shipParts li{display:flex;flex-direction:column;gap:6px}
+.spTop{display:flex;justify-content:space-between;align-items:baseline}
+.spPct{font:600 13px var(--num);color:var(--muted)}
+.spPct.mid{color:var(--gold)}.spPct.bad{color:var(--warn)}
+.spRow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.spBtn{padding:7px 12px;font-size:13px;flex:none}
+.sdCoat{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.sdCoat button{align-self:flex-start}
 /* Neue Ordnung */
 :root{--navH:64px}
 .app{padding-bottom:calc(var(--navH) + 10px + env(safe-area-inset-bottom,0px))}
@@ -928,6 +961,14 @@ button.danger{color:var(--warn);border-color:var(--warn)}
   </div>
 </div>
 
+<div class="modal" id="donateModal" role="alertdialog" aria-modal="true" aria-labelledby="donateTitle" aria-describedby="donateText" hidden style="z-index:45">
+  <div class="card">
+    <div class="newBadge"><span aria-hidden="true" style="font-size:34px" id="donateIcon">🏠</span><div><h2 id="donateTitle"></h2><span id="donateStep"></span></div></div>
+    <p id="donateText" style="margin:0;max-width:65ch"></p>
+    <div class="cardBtns"><button type="button" id="donateNo">Abbrechen</button><button type="button" class="primary danger" id="donateYes"></button></div>
+  </div>
+</div>
+
 <div class="sheet" id="achSheet" role="dialog" aria-modal="true" aria-labelledby="achTitle" hidden>
   <div class="sheetInner">
     <div class="sheetHead">
@@ -1020,7 +1061,15 @@ button.danger{color:var(--warn);border-color:var(--warn)}
     <section><h3>Kurioses</h3><div id="funWrap"><div id="dealBox"></div><div id="funList" style="display:flex;flex-direction:column;gap:8px"></div></div></section>
     <section id="onboardSec"><h3>Deine Crew</h3><div class="crew" id="onboard"></div></section>
     <section><h3>Sammelbuch</h3><p class="note left" id="bookCount" style="margin:0"></p><div class="book" id="book"></div></section>
-    <section id="harborSec"><h3>Dein Hafen</h3><div class="harbor" id="harbor"></div></section>
+    <section id="harborSec"><h3>Dein Hafen</h3><div class="harbor" id="harbor"></div>
+      <button type="button" class="danger" id="burnBtn">🔥 Alle Boote abfackeln</button>
+      <p class="note left" style="margin:0">Fackelt alle fertigen Boote in deinem Hafen ab. Baupläne, Abzeichen und das Boot, an dem du gerade baust, bleiben erhalten.</p>
+    </section>
+    <section id="donateSec"><h3>Waisenhaus Möwennest</h3>
+      <p class="note left">Im Waisenhaus Möwennest leben Kinder, deren Eltern von Piraten überfallen wurden. Du kannst ihnen alle deine Kuriositäten schenken: Crew, Tiere, Proviant, Ausrüstung, Seltenes und Saisonartikel. Baumaterial, Boote, Muscheln, Perlmuscheln und Serienschutz behältst du. Dein Sammelbuch bleibt vollständig.</p>
+      <p class="note left" id="donateInfo" style="margin:0"></p>
+      <button type="button" id="donateBtn">Alle Kuriositäten spenden</button>
+    </section>
     <section id="upcomingSec"><h3>Kommende Boote</h3><ul class="upcoming" id="upcoming"></ul></section>
     <details>
       <summary>So verdienst du Muscheln</summary>
@@ -1794,7 +1843,7 @@ function onRowerData(e){
 // Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
 // wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
 let gattStep = '';
-const APP_VERSION = '23.11.2026 d';
+const APP_VERSION = '23.11.2026 i';
 // Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
 const connLog = [];
 function connNote(text){
@@ -2526,18 +2575,19 @@ const priceHtml = it => it.pearl ? '<span class="price">' + PEARL_SVG + it.pearl
 
 // ---------- Materialien und Boote ----------
 const MATS = {
-  kiefer:   {name: 'Kiefernholz',      icon: '🪵', price: 20},
-  hanf:     {name: 'Hanfseil',         icon: '🪢', price: 15},
-  leinen:   {name: 'Leinenstoff',      icon: '🧵', price: 25},
-  farbe:    {name: 'Farbtopf',         icon: '🎨', price: 20},
-  eiche:    {name: 'Eichenholz',       icon: '🌳', price: 50},
-  teer:     {name: 'Teer',             icon: '🛢️', price: 30},
-  nieten:   {name: 'Eisennieten',      icon: '🔩', price: 35},
-  wolle:    {name: 'Wolltuch',         icon: '🧶', price: 45},
-  segeltuch:{name: 'Feines Segeltuch', icon: '🏳️', price: 60},
-  bronze:   {name: 'Bronzebeschlag',   icon: '🥉', price: 90},
-  teak:     {name: 'Teakholz',         icon: '🟫', price: 120},
-  gold:     {name: 'Blattgold',        icon: '✨', pearl: 1}
+  kiefer:   {name: 'Kiefernholz',      icon: '🪵', price: 30},
+  hanf:     {name: 'Hanfseil',         icon: '🪢', price: 23},
+  leinen:   {name: 'Leinenstoff',      icon: '🧵', price: 38},
+  farbe:    {name: 'Farbtopf',         icon: '🎨', price: 30},
+  eiche:    {name: 'Eichenholz',       icon: '🌳', price: 75},
+  teer:     {name: 'Teer',             icon: '🛢️', price: 45},
+  nieten:   {name: 'Eisennieten',      icon: '🔩', price: 53},
+  wolle:    {name: 'Wolltuch',         icon: '🧶', price: 68},
+  segeltuch:{name: 'Feines Segeltuch', icon: '🏳️', price: 90},
+  bronze:   {name: 'Bronzebeschlag',   icon: '🥉', price: 135},
+  teak:     {name: 'Teakholz',         icon: '🟫', price: 180},
+  gold:     {name: 'Blattgold',        icon: '✨', pearl: 2},
+  lack:     {name: 'Schutzlackierung', icon: '🛡️', pearl: 1}
 };
 const PARTS = [['kiel', 'Kiel'], ['rumpf', 'Rumpf'], ['ruder', 'Ruder'], ['segel', 'Segel'], ['bemalung', 'Bemalung']];
 const BOATS = [
@@ -2564,39 +2614,39 @@ const CREW_NAMES = ['Hein Holzbein', 'Einäugige Erna', 'Käpt\'n Kieselbart', '
 const FUN_CATS = [['crew', 'Crew und Tiere'], ['food', 'Proviant'], ['gear', 'Ausrüstung'], ['rare', 'Seltenes, nur gegen Perlmuscheln'], ['season', 'Saisonartikel']];
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const FUN = [
-  {id: 'crew',        cat: 'crew',   name: 'Piraten-Crewmitglied', icon: '🏴‍☠️', price: 150, multi: true, desc: 'Heuert einen neuen Matrosen an. Bis zu 12, jeder mit eigenem Namen.'},
-  {id: 'smutje',      cat: 'crew',   name: 'Smutje',               icon: '🧑‍🍳', price: 180, desc: 'Der Schiffskoch. Kocht nach jedem Training ein anderes Gericht.'},
-  {id: 'ausguck',     cat: 'crew',   name: 'Ausguck',              icon: '👀', price: 140, desc: 'Ruft „Land in Sicht!“, wenn du kurz vor einem neuen Fluss-Abzeichen bist.'},
-  {id: 'papagei',     cat: 'crew',   name: 'Papagei',              icon: '🦜', price: 120, desc: 'Kommentiert jedes Training und lernt jede Woche einen neuen Spruch.'},
-  {id: 'katze',       cat: 'crew',   name: 'Schiffskatze',         icon: '🐈', price: 90,  desc: 'Hält die Mäuse vom Proviant fern.'},
-  {id: 'moewe',       cat: 'crew',   name: 'Möwe',                 icon: '🐦', price: 50,  desc: 'Frech und hungrig. Klaut gelegentlich eine Orange aus dem Fass.'},
-  {id: 'schildkroete',cat: 'crew',   name: 'Schildkröte',          icon: '🐢', price: 100, desc: 'Das langsamste Crewmitglied, aber sie gibt nie auf. Lobt lange Einheiten.'},
-  {id: 'ente',        cat: 'crew',   name: 'Quietscheente',        icon: '🦆', price: 20,  multi: true, desc: 'Das kleinste Mitglied der Besatzung.'},
-  {id: 'orangen',     cat: 'food',   name: 'Fass Orangen',         icon: '🍊', price: 40,  multi: true, desc: 'Gegen Skorbut. Kein Seemann fährt ohne.'},
-  {id: 'zwieback',    cat: 'food',   name: 'Zwieback-Kiste',       icon: '🍞', price: 30,  multi: true, desc: 'Hart wie Holz und hält ewig.'},
-  {id: 'sauerkraut',  cat: 'food',   name: 'Kiste Sauerkraut',     icon: '🥬', price: 35,  multi: true, desc: 'Vitamin C für lange Fahrten. Schon James Cook hatte es an Bord.'},
-  {id: 'rollmops',    cat: 'food',   name: 'Glas Rollmöpse',       icon: '🐟', price: 25,  multi: true, desc: 'Eingelegter Hering, ordentlich aufgerollt.'},
-  {id: 'ingwer',      cat: 'food',   name: 'Fass Ingwerlimo',      icon: '🥤', price: 45,  multi: true, desc: 'Scharf und spritzig. Hilft gegen Seekrankheit.'},
-  {id: 'glocke',      cat: 'gear',   name: 'Schiffsglocke',        icon: '🔔', price: 110, desc: 'Läutet beim Rudern alle 500 Meter.'},
-  {id: 'fernrohr',    cat: 'gear',   name: 'Fernrohr',             icon: '🔭', price: 130, desc: 'Zeigt beim Rudern, wie weit es bis zum nächsten Fluss ist. Schalte dafür den Wert „Nächster Fluss“ ein.'},
-  {id: 'akkordeon',   cat: 'gear',   name: 'Shanty-Akkordeon',     icon: '🪗', price: 60,  desc: 'Spielt ein kurzes Shanty, sobald du beim Rudern dein Ziel erreichst.'},
-  {id: 'karte',       cat: 'gear',   name: 'Schatzkarte',          icon: '🗺️', price: 80,  multi: true, desc: 'Startet eine Schatzsuche: Rudere bis zum markierten Punkt und finde eine Truhe.'},
-  {id: 'flasche',     cat: 'gear',   name: 'Flaschenpost',         icon: '📜', price: 25,  multi: true, desc: 'Enthält eine Nachricht von See.'},
-  {id: 'kompass',     cat: 'gear',   name: 'Kompass',              icon: '🧭', price: 90,  desc: 'Zeigt immer nach Norden. Meistens.'},
-  {id: 'rettungsring',cat: 'gear',   name: 'Rettungsring',         icon: '🛟', price: 60,  desc: 'Für alle Fälle.'},
-  {id: 'haengematte', cat: 'gear',   name: 'Hängematte',           icon: '🛏️', price: 70,  desc: 'Für die verdiente Pause nach dem Training.'},
-  {id: 'anker',       cat: 'rare',   name: 'Goldener Anker',       icon: '⚓', pearl: 2,   desc: 'Aus purem Gold. Viel zu schwer zum Ankern, aber wunderschön.'},
-  {id: 'schuppe',     cat: 'rare',   name: 'Meerjungfrauenschuppe',icon: '🧜', pearl: 1,   desc: 'Schimmert in allen Farben des Meeres. Woher sie stammt, verrät niemand.'},
-  {id: 'krakenei',    cat: 'rare',   name: 'Kraken-Ei',            icon: '🥚', pearl: 3,   desc: 'Schlüpft nach 7 Trainingstagen. Was wohl herauskommt?'},
-  {id: 'laterne',     cat: 'rare',   name: 'Geisterschiff-Laterne',icon: '🏮', pearl: 2,   desc: 'Leuchtet grünlich in nebligen Nächten. Gehörte einst einem Geisterschiff.'},
+  {id: 'crew',        cat: 'crew',   name: 'Piraten-Crewmitglied', icon: '🏴‍☠️', price: 225, multi: true, desc: 'Heuert einen neuen Matrosen an. Bis zu 12, jeder mit eigenem Namen.'},
+  {id: 'smutje',      cat: 'crew',   name: 'Smutje',               icon: '🧑‍🍳', price: 270, desc: 'Der Schiffskoch. Kocht nach jedem Training ein anderes Gericht.'},
+  {id: 'ausguck',     cat: 'crew',   name: 'Ausguck',              icon: '👀', price: 210, desc: 'Ruft „Land in Sicht!“, wenn du kurz vor einem neuen Fluss-Abzeichen bist.'},
+  {id: 'papagei',     cat: 'crew',   name: 'Papagei',              icon: '🦜', price: 180, desc: 'Kommentiert jedes Training und lernt jede Woche einen neuen Spruch.'},
+  {id: 'katze',       cat: 'crew',   name: 'Schiffskatze',         icon: '🐈', price: 135,  desc: 'Hält die Mäuse vom Proviant fern.'},
+  {id: 'moewe',       cat: 'crew',   name: 'Möwe',                 icon: '🐦', price: 75,  desc: 'Frech und hungrig. Klaut gelegentlich eine Orange aus dem Fass.'},
+  {id: 'schildkroete',cat: 'crew',   name: 'Schildkröte',          icon: '🐢', price: 150, desc: 'Das langsamste Crewmitglied, aber sie gibt nie auf. Lobt lange Einheiten.'},
+  {id: 'ente',        cat: 'crew',   name: 'Quietscheente',        icon: '🦆', price: 30,  multi: true, desc: 'Das kleinste Mitglied der Besatzung.'},
+  {id: 'orangen',     cat: 'food',   name: 'Fass Orangen',         icon: '🍊', price: 60,  multi: true, desc: 'Gegen Skorbut. Kein Seemann fährt ohne.'},
+  {id: 'zwieback',    cat: 'food',   name: 'Zwieback-Kiste',       icon: '🍞', price: 45,  multi: true, desc: 'Hart wie Holz und hält ewig.'},
+  {id: 'sauerkraut',  cat: 'food',   name: 'Kiste Sauerkraut',     icon: '🥬', price: 53,  multi: true, desc: 'Vitamin C für lange Fahrten. Schon James Cook hatte es an Bord.'},
+  {id: 'rollmops',    cat: 'food',   name: 'Glas Rollmöpse',       icon: '🐟', price: 38,  multi: true, desc: 'Eingelegter Hering, ordentlich aufgerollt.'},
+  {id: 'ingwer',      cat: 'food',   name: 'Fass Ingwerlimo',      icon: '🥤', price: 68,  multi: true, desc: 'Scharf und spritzig. Hilft gegen Seekrankheit.'},
+  {id: 'glocke',      cat: 'gear',   name: 'Schiffsglocke',        icon: '🔔', price: 165, desc: 'Läutet beim Rudern alle 500 Meter.'},
+  {id: 'fernrohr',    cat: 'gear',   name: 'Fernrohr',             icon: '🔭', price: 195, desc: 'Zeigt beim Rudern, wie weit es bis zum nächsten Fluss ist. Schalte dafür den Wert „Nächster Fluss“ ein.'},
+  {id: 'akkordeon',   cat: 'gear',   name: 'Shanty-Akkordeon',     icon: '🪗', price: 90,  desc: 'Spielt ein kurzes Shanty, sobald du beim Rudern dein Ziel erreichst.'},
+  {id: 'karte',       cat: 'gear',   name: 'Schatzkarte',          icon: '🗺️', price: 120,  multi: true, desc: 'Startet eine Schatzsuche: Rudere bis zum markierten Punkt und finde eine Truhe.'},
+  {id: 'flasche',     cat: 'gear',   name: 'Flaschenpost',         icon: '📜', price: 38,  multi: true, desc: 'Enthält eine Nachricht von See.'},
+  {id: 'kompass',     cat: 'gear',   name: 'Kompass',              icon: '🧭', price: 135,  desc: 'Zeigt immer nach Norden. Meistens.'},
+  {id: 'rettungsring',cat: 'gear',   name: 'Rettungsring',         icon: '🛟', price: 90,  desc: 'Für alle Fälle.'},
+  {id: 'haengematte', cat: 'gear',   name: 'Hängematte',           icon: '🛏️', price: 105,  desc: 'Für die verdiente Pause nach dem Training.'},
+  {id: 'anker',       cat: 'rare',   name: 'Goldener Anker',       icon: '⚓', pearl: 3,   desc: 'Aus purem Gold. Viel zu schwer zum Ankern, aber wunderschön.'},
+  {id: 'schuppe',     cat: 'rare',   name: 'Meerjungfrauenschuppe',icon: '🧜', pearl: 2,   desc: 'Schimmert in allen Farben des Meeres. Woher sie stammt, verrät niemand.'},
+  {id: 'krakenei',    cat: 'rare',   name: 'Kraken-Ei',            icon: '🥚', pearl: 5,   desc: 'Schlüpft nach 7 Trainingstagen. Was wohl herauskommt?'},
+  {id: 'laterne',     cat: 'rare',   name: 'Geisterschiff-Laterne',icon: '🏮', pearl: 3,   desc: 'Leuchtet grünlich in nebligen Nächten. Gehörte einst einem Geisterschiff.'},
   {id: 'krake',       cat: 'rare',   name: 'Kleiner Krake',        icon: '🐙', hidden: true, desc: 'Aus deinem Kraken-Ei geschlüpft. Rudert mit acht Armen mit.'},
-  {id: 'konfetti',    cat: 'season', name: 'Konfetti-Kanone',      icon: '🎉', price: 60,  month: 2,  desc: 'Für den Karneval auf hoher See. Helau und Ahoi!'},
-  {id: 'osterei',     cat: 'season', name: 'Netz voller Ostereier',icon: '🐣', price: 35,  month: 4,  desc: 'Bunt bemalt und gut versteckt im Laderaum.'},
-  {id: 'sonnenschirm',cat: 'season', name: 'Sonnenschirm',         icon: '⛱️', price: 55,  month: 7,  desc: 'Für die Mittagspause an Deck.'},
-  {id: 'kuerbis',     cat: 'season', name: 'Kürbislaterne',        icon: '🎃', price: 45,  month: 10, desc: 'Gruselig gute Beleuchtung für Halloween.'},
-  {id: 'martin',      cat: 'season', name: 'Martinslaterne',       icon: '🕯️', price: 45,  month: 11, desc: 'Für den Laternenumzug am Martinstag.'},
-  {id: 'muetze',      cat: 'season', name: 'Weihnachtsmützen',     icon: '🎅', price: 40,  month: 12, desc: 'Eine Mütze für jedes Crewmitglied.'},
-  {id: 'lebkuchen',   cat: 'season', name: 'Fass Lebkuchen',       icon: '🍪', price: 50,  month: 12, desc: 'Für die lange Winterfahrt.'},
+  {id: 'konfetti',    cat: 'season', name: 'Konfetti-Kanone',      icon: '🎉', price: 90,  month: 2,  desc: 'Für den Karneval auf hoher See. Helau und Ahoi!'},
+  {id: 'osterei',     cat: 'season', name: 'Netz voller Ostereier',icon: '🐣', price: 53,  month: 4,  desc: 'Bunt bemalt und gut versteckt im Laderaum.'},
+  {id: 'sonnenschirm',cat: 'season', name: 'Sonnenschirm',         icon: '⛱️', price: 83,  month: 7,  desc: 'Für die Mittagspause an Deck.'},
+  {id: 'kuerbis',     cat: 'season', name: 'Kürbislaterne',        icon: '🎃', price: 68,  month: 10, desc: 'Gruselig gute Beleuchtung für Halloween.'},
+  {id: 'martin',      cat: 'season', name: 'Martinslaterne',       icon: '🕯️', price: 68,  month: 11, desc: 'Für den Laternenumzug am Martinstag.'},
+  {id: 'muetze',      cat: 'season', name: 'Weihnachtsmützen',     icon: '🎅', price: 60,  month: 12, desc: 'Eine Mütze für jedes Crewmitglied.'},
+  {id: 'lebkuchen',   cat: 'season', name: 'Fass Lebkuchen',       icon: '🍪', price: 75,  month: 12, desc: 'Für die lange Winterfahrt.'},
   {id: 'stiefel',     cat: 'season', name: 'Nikolausstiefel',      icon: '👢', hidden: true, how: 'Nur hinter Türchen 6 im Adventskalender.', desc: 'Frisch geputzt und prall gefüllt.'},
   {id: 'stern',       cat: 'season', name: 'Weihnachtsstern am Mast', icon: '⭐', hidden: true, how: 'Nur hinter Türchen 24 im Adventskalender.', desc: 'Leuchtet ganz oben am Mast über die ganze Bucht.'}
 ];
@@ -2919,6 +2969,14 @@ function boatSVG(bi, built, opts = {}){
 
 // ---------- Werft-Ansicht ----------
 const curBoat = () => wallet.boat < BOATS.length ? BOATS[wallet.boat] : null;
+// Nächster noch nie gebauter Bootstyp (−1 = alle schon einmal gebaut). Bis dahin ist jeder Typ freigeschaltet und beliebig oft baubar.
+// alle je gebauten Boote (Freischaltungen, Abzeichen); wallet.fleet = was im Hafen liegt. Ältere Stände: aus dem Hafen übernehmen.
+const builtList = () => wallet.built || (wallet.built = wallet.fleet.slice());
+const nextNewIdx = () => BOATS.findIndex(b => !builtList().includes(b.id));
+const unlockedMax = () => { const n = nextNewIdx(); return n < 0 ? BOATS.length - 1 : n; };
+const builtCount = id => builtList().filter(x => x === id).length;
+const harborCount = id => wallet.fleet.filter(x => x === id).length;
+const boatArt = B => B.id === 'kutter' ? 'einen Fischkutter' : B.id === 'wikinger' ? 'ein Wikingerschiff' : B.id === 'kogge' ? 'eine Kogge' : B.id === 'galeone' ? 'eine Galeone' : 'eine Jolle';
 const nextPartIdx = () => PARTS.findIndex(([p]) => !wallet.parts[p]);
 function canAfford(it, n = 1){ return it.pearl ? wallet.pearls >= it.pearl * n : wallet.shells >= it.price * n; }
 function pay(it, n = 1){ if (it.pearl) wallet.pearls -= it.pearl * n; else wallet.shells -= it.price * n; }
@@ -2940,8 +2998,12 @@ function renderShop(){
   if (!B){
     $('boatCard').innerHTML = '<span class="label">Werft vollendet</span><h3 class="boatName">Flotte komplett</h3><p style="margin:0">Du hast alle fünf Boote gebaut. Ahoi, Kapitän!</p>' + boatSVG(BOATS.length - 1, {kiel: 1, rumpf: 1, ruder: 1, segel: 1, bemalung: 1});
   } else {
-    const ni = nextPartIdx(), prog = partProgress(wallet.boat);
-    $('boatCard').innerHTML = '<span class="label">Boot ' + (wallet.boat + 1) + ' von ' + BOATS.length + '</span><h3 class="boatName">' + B.name + '</h3>' +
+    const ni = nextPartIdx(), prog = partProgress(wallet.boat), started = PARTS.some(([p]) => wallet.parts[p]), um = unlockedMax(), cnt = builtCount(B.id);
+    const pick = um > 0 ? '<div class="boatPick" role="group" aria-label="Bauplan wählen">' + BOATS.slice(0, um + 1).map((b, i) => {
+        const n = builtCount(b.id), isNew = !n;
+        return '<button type="button" data-plan="' + i + '" aria-pressed="' + (i === wallet.boat) + '"' + (started && i !== wallet.boat ? ' disabled title="Erst das angefangene Boot fertig bauen"' : '') + '>' + b.name + (isNew ? ' <small>neu</small>' : ' <small>×' + n + '</small>') + '</button>';
+      }).join('') + '</div>' + (started ? '<p class="note left" style="margin:0">Den Bauplan wechseln kannst du, sobald dieses Boot fertig ist.</p>' : '') : '';
+    $('boatCard').innerHTML = pick + '<span class="label">' + (cnt ? 'Nachbau · ' + B.name + ' Nr. ' + (cnt + 1) : 'Neuer Bootstyp · ' + (wallet.boat + 1) + ' von ' + BOATS.length) + '</span><h3 class="boatName">' + B.name + '</h3>' +
       '<p class="note left" style="margin:-4px 0 0">' + B.blurb + '</p><div class="boatPic">' + boatSVG(wallet.boat, wallet.parts, {deck: true, prog}) + '</div>' +
       '<p class="bpLegend"><span><i class="lgB"></i>gebaut</span><span><i class="lgM"></i>Material gekauft</span><span><i class="lgG"></i>fehlt noch</span></p><ol class="parts">' +
       PARTS.map(([p, pn], i) => {
@@ -2959,16 +3021,17 @@ function renderShop(){
   // Materiallager: Materialien des aktuellen Boots und alles, was schon im Lager liegt
   const keys = new Set(B ? Object.keys(missingFor(wallet.boat).need) : []);
   for (const k in wallet.inv) if (wallet.inv[k] > 0) keys.add(k);
+  if (typeof shipKeys === 'function') shipKeys().forEach(k => keys.add(k));
   const order = Object.keys(MATS).filter(k => keys.has(k));
   const mf = B ? missingFor(wallet.boat) : {need: {}, miss: {}};
   let rows = order.map(k => {
     const M = MATS[k], have = wallet.inv[k] || 0, need = mf.need[k] || 0, miss = mf.miss[k] || 0;
     return '<div class="shopRow"><span class="ic" aria-hidden="true">' + M.icon + '</span><div><span class="nm">' + M.name + '</span><span class="sb">Im Lager ' + have +
-      (need ? ' · für dieses Boot ' + need + (miss ? ', es fehlen ' + miss : ', reicht') : '') + '</span></div>' +
+      (need ? ' · für dieses Boot ' + need + (miss ? ', es fehlen ' + miss : ', reicht') : '') + (k === 'lack' ? ' · schützt ein Boot 3 Monate vor Verfall' : '') + '</span></div>' +
       '<button type="button" data-buy="' + k + '"' + (canAfford(M) ? '' : ' disabled') + ' aria-label="' + M.name + ' kaufen">' + priceHtml(M) + '</button></div>';
   }).join('');
   const missShells = Object.keys(mf.miss).filter(k => !MATS[k].pearl).reduce((a, k) => a + MATS[k].price * mf.miss[k], 0);
-  const missPearls = Object.keys(mf.miss).filter(k => MATS[k].pearl).reduce((a, k) => a + mf.miss[k], 0);
+  const missPearls = Object.keys(mf.miss).filter(k => MATS[k].pearl).reduce((a, k) => a + MATS[k].pearl * mf.miss[k], 0);
   if (missShells || missPearls){
     const ok = wallet.shells >= missShells && wallet.pearls >= missPearls;
     rows += '<div class="shopRow"><span class="ic" aria-hidden="true">📦</span><div><span class="nm">Alles Fehlende für ' + B.name + '</span><span class="sb">' +
@@ -2977,23 +3040,23 @@ function renderShop(){
   }
   $('matList').innerHTML = rows || '<div class="shopRow"><span></span><span class="sb">Keine Materialien nötig.</span><span></span></div>';
   // Serienschutz
-  const FZ = {price: 200};
+  const FZ = {price: 300};
   $('freezeList').innerHTML = '<div class="shopRow"><span class="ic" aria-hidden="true">' + SHIELD_SVG.replace('<svg', '<svg width="28" height="28"') + '</span><div><span class="nm">Serienschutz</span><span class="sb">Vorrat ' + wallet.freeze + ' von 2' +
     (wallet.frozen.length ? ' · bisher ' + wallet.frozen.length + '× eingesetzt' : '') + '</span></div><button type="button" id="buyFreeze"' + (wallet.freeze < 2 && canAfford(FZ) ? '' : ' disabled') + '>' +
     (wallet.freeze >= 2 ? 'Voll' : priceHtml(FZ)) + '</button></div>';
   renderFun();
   // Hafen
   $('harborSec').hidden = !wallet.fleet.length;
-  $('harbor').innerHTML = wallet.fleet.map(id => { const i = BOATS.findIndex(b => b.id === id); return '<figure>' + boatSVG(i, {kiel: 1, rumpf: 1, ruder: 1, segel: 1, bemalung: 1}, {crop: true}) + '<figcaption>' + BOATS[i].name + '</figcaption></figure>'; }).join('');
+  $('harbor').innerHTML = renderHarborShips();
   // Kommende Boote
-  const up = BOATS.slice(wallet.boat + 1);
+  const nn = nextNewIdx(), base = nn < 0 ? BOATS.length : nn, up = BOATS.slice(base + 1);
   $('upcomingSec').hidden = !up.length;
   $('upcoming').innerHTML = up.map((b, j) => {
     const mf2 = {}; for (const [p] of PARTS) for (const k in b.need[p]) mf2[k] = 1;
-    const prevMats = new Set(); BOATS.slice(0, wallet.boat + 1 + j).forEach(pb => PARTS.forEach(([p]) => Object.keys(pb.need[p]).forEach(k => prevMats.add(k))));
+    const prevMats = new Set(); BOATS.slice(0, base + 1 + j).forEach(pb => PARTS.forEach(([p]) => Object.keys(pb.need[p]).forEach(k => prevMats.add(k))));
     const special = Object.keys(mf2).filter(k => !prevMats.has(k));
     const cost = PARTS.reduce((a, [p]) => a + Object.keys(b.need[p]).reduce((c, k) => c + (MATS[k].price || 0) * b.need[p][k], 0), 0);
-    const pearls = PARTS.reduce((a, [p]) => a + (b.need[p].gold || 0), 0);
+    const pearls = PARTS.reduce((a, [p]) => a + (b.need[p].gold || 0) * (MATS.gold.pearl || 1), 0);
     return '<li><b>' + b.name + '</b> · etwa ' + nf(cost) + ' Muscheln' + (pearls ? ' und ' + pearls + ' Perlmuschel' + (pearls > 1 ? 'n' : '') : '') +
       (special.length ? ' · neu: ' + special.map(k => MATS[k].icon + ' ' + MATS[k].name).join(', ') : '') + '</li>';
   }).join('');
@@ -3034,6 +3097,11 @@ $('shopSheet').addEventListener('click', e => {
     const mf = missingFor(wallet.boat);
     deal(() => { for (const k in mf.miss){ pay(MATS[k], mf.miss[k]); wallet.inv[k] = (wallet.inv[k] || 0) + mf.miss[k]; } });
     toast('Alle Materialien für ' + curBoat().name + ' gekauft', true);
+  } else if (t.dataset.plan != null){
+    const i = +t.dataset.plan;
+    if (i === wallet.boat || PARTS.some(([p]) => wallet.parts[p]) || i > unlockedMax()) return;
+    deal(() => { wallet.boat = i; wallet.parts = {}; });
+    toast('Bauplan: ' + BOATS[i].name, true);
   } else if (t.dataset.build){
     const p = t.dataset.build, B = curBoat(), req = B.need[p];
     deal(() => { for (const k in req) wallet.inv[k] -= req[k]; wallet.parts[p] = 1; });
@@ -3041,7 +3109,7 @@ $('shopSheet').addEventListener('click', e => {
     if (PARTS.every(([q]) => wallet.parts[q])) finishBoat();
     else toast(pn + ' gebaut', true);
   } else if (t.id === 'buyFreeze'){
-    deal(() => { if (wallet.freeze >= 2 || wallet.shells < 200) return false; wallet.shells -= 200; wallet.freeze++; });
+    deal(() => { if (wallet.freeze >= 2 || wallet.shells < 300) return false; wallet.shells -= 300; wallet.freeze++; });
     toast('Serienschutz gekauft', true);
   } else if (t.dataset.fun){
     buyFun(t.dataset.fun, false);
@@ -3052,13 +3120,18 @@ $('shopSheet').addEventListener('click', e => {
   }
 });
 function finishBoat(){
-  const bi = wallet.boat, B = BOATS[bi];
-  wallet.fleet.push(B.id); wallet.boat++; wallet.parts = {};
+  const bi = wallet.boat, B = BOATS[bi], wasNew = !builtList().includes(B.id);
+  wallet.fleet.push(B.id); builtList().push(B.id); shipsArr().push(newShip(B.id)); wallet.parts = {};
+  const nn = nextNewIdx();
+  wallet.boat = nn >= 0 ? nn : bi;                        // neuer Typ wartet? Sonst denselben nochmal vorschlagen
+  const fresh = checkBadges();
+  if (fresh.length) wallet.pearls += fresh.length;
   undoState = null; saveWallet(); renderShop(); $('toast').hidden = true;
-  const N = BOATS[wallet.boat];
-  showInfo('', B.name + ' fertig!', 'Liegt jetzt in deinem Hafen',
-    N ? 'Glückwunsch, Kapitän! Als Nächstes baust du ' + (N.id === 'kutter' ? 'einen Fischkutter' : N.id === 'wikinger' ? 'ein Wikingerschiff' : N.id === 'kogge' ? 'eine Kogge' : 'eine Galeone') + '. ' + N.blurb
-      : 'Das war das letzte Boot. Deine Flotte ist komplett.', '', boatSVG(bi, {kiel: 1, rumpf: 1, ruder: 1, segel: 1, bemalung: 1}, {crop: true}));
+  const N = nn >= 0 ? BOATS[nn] : null, n = builtCount(B.id);
+  const txt = (wasNew ? 'Neuer Bootstyp freigeschaltet: ' + B.name + ' kannst du ab jetzt so oft bauen, wie du willst. ' : 'Das ist dein ' + n + '. Boot dieser Art. ') +
+    (N ? 'Als Nächstes wartet ' + boatArt(N) + '. ' + N.blurb + ' Oder wähle oben einen anderen Bauplan.' : 'Alle Bootstypen sind freigeschaltet. Wähle oben, was du als Nächstes baust.') +
+    (fresh.length ? ' Neues Abzeichen: ' + fresh.map(b => b.name).join(', ') + ' (+' + fresh.length + ' Perlmuschel' + (fresh.length > 1 ? 'n' : '') + ').' : '');
+  showInfo('', B.name + ' fertig!', 'Liegt jetzt in deinem Hafen · ' + builtList().length + (builtList().length === 1 ? ' Boot' : ' Boote') + ' gebaut', txt, '', boatSVG(bi, {kiel: 1, rumpf: 1, ruder: 1, segel: 1, bemalung: 1}, {crop: true}));
 }
 // Allgemeiner Info-Dialog (nutzt die Abzeichen-Karte)
 function showInfo(iconHtml, title, sub, text, state, pic){
@@ -3855,7 +3928,7 @@ function openDoor(day){
 // ---------- Handelsaufträge der Hanse ----------
 const GOODS = ['Salz', 'Heringe', 'Tuch', 'Bernstein', 'Pelze', 'Wein', 'Getreide', 'Wachs', 'Gewürze', 'Honig'];
 const HANSE = ['Lübeck', 'Hamburg', 'Bremen', 'Danzig', 'Riga', 'Bergen', 'Brügge', 'Stralsund', 'Rostock', 'Wismar'];
-const hanseOpen = () => wallet.fleet.includes('kogge');
+let hanseOpen = () => wallet.fleet.includes('kogge');
 function contractOf(wk){
   const x = mixHash('hanse' + wk), kmN = 10 + x % 16;
   return {wk, good: GOODS[x % GOODS.length], city: HANSE[(x >> 4) % HANSE.length], km: kmN, s: kmN * 6, p: kmN >= 20 ? 1 : 0};
@@ -4024,7 +4097,7 @@ function renderSea(){
   }
   // Hanse
   const wk = weekKey(localDate(Date.now())), C = contractOf(wk);
-  if (!hanseOpen()) $('hanseCard').innerHTML = '<span class="label">Handelsaufträge der Hanse</span><p class="note left" style="margin:0">Sobald deine Kogge vom Stapel gelaufen ist, bekommst du jede Woche einen Auftrag: Waren in eine Hansestadt bringen, indem du eine bestimmte Strecke ruderst.</p>';
+  if (!hanseOpen()) $('hanseCard').innerHTML = '<span class="label">Handelsaufträge der Hanse · gesperrt</span>' + (builtList().includes('kogge') ? '<p class="note left" style="margin:0"><b>Ohne Kogge im Hafen keine Aufträge.</b> Bau eine neue Kogge, dann nimmt die Hanse wieder Aufträge von dir an.</p>' : '') + '<p class="note left" style="margin:0">Sobald deine Kogge vom Stapel gelaufen ist, bekommst du jede Woche einen Auftrag: Waren in eine Hansestadt bringen, indem du eine bestimmte Strecke ruderst.</p>';
   else {
     const done = wallet.contracts && wallet.contracts[wk], have = weekM(wk) / 1000;
     $('hanseCard').innerHTML = '<span class="label">Auftrag der Hanse · diese Woche</span><b>' + C.good + ' nach ' + C.city + '</b>' +
@@ -6112,6 +6185,255 @@ BADGES.push(
   };
   if (was) buildScreens();
 })();
+
+// =====================================================================
+// Flotte: Bootstypen mehrfach bauen, Abzeichen für die Werft
+// =====================================================================
+if (wallet.boat >= BOATS.length){ wallet.boat = BOATS.length - 1; wallet.parts = {}; saveWallet(); }   // alte Stände: „Flotte komplett“
+const _statsF = stats;
+stats = () => {
+  const S = _statsF(), F = (typeof wallet !== 'undefined' && wallet && builtList()) || [];
+  S.boats = F.length;
+  BOATS.forEach(b => S['bt_' + b.id] = F.filter(x => x === b.id).length);
+  S.boatTypes = BOATS.filter(b => S['bt_' + b.id]).length;
+  S.arche = Math.min(...BOATS.map(b => S['bt_' + b.id]));
+  let run = 0, best = 0; F.forEach((x, i) => { run = i && F[i - 1] === x ? run + 1 : 1; best = Math.max(best, run); });
+  S.boatRun = best;
+  return S;
+};
+ICONS.fleet = '<path d="M3 15h18l-2.5 4.5h-13zM12 3v12M12 4l6 8h-6M12 6l-4 6h4"/>';
+CAT_COLOR.fleet = '#c9a06a';
+CAT_HELP.fleet = 'Zählt die Boote, die du in der Werft fertig gebaut hast. Jeden Bootstyp, den du einmal gebaut hast, kannst du danach beliebig oft nachbauen: Wähle dazu oben in der Werft den Bauplan. Jedes neue Abzeichen bringt eine Perlmuschel.';
+CATS.splice(CATS.findIndex(c => c[0] === 'collect'), 0, ['fleet', 'Werft – deine Flotte']);
+const fb = (id, name, desc, v, t, help) => ({id, cat: 'fleet', name, desc, v, t, f: 'count', help});
+BADGES.push(
+  fb('fl1',  'Stapellauf',              'Dein erstes Boot fertig gebaut', S => S.boats, 1, 'Eine Flasche Sekt gegen den Bug, und ab ins Wasser!'),
+  fb('fl3',  'Kleine Flottille',        '3 Boote gebaut', S => S.boats, 3),
+  fb('fl5',  'Reederei Wellenschlag',   '5 Boote gebaut', S => S.boats, 5, 'Fünf Schiffe unter eigener Flagge. Zeit für ein Firmenschild am Hafen.'),
+  fb('fl10', 'Hafenmeister',            '10 Boote gebaut', S => S.boats, 10),
+  fb('fl20', 'Armada',                  '20 Boote gebaut', S => S.boats, 20),
+  fb('fl35', 'Herr der sieben Meere',   '35 Boote gebaut', S => S.boats, 35, 'Fünf Boote für jedes der sieben Meere. Niemand segelt mehr an dir vorbei.'),
+  fb('flAll','Schiffbaumeister',        'Jeden der 5 Bootstypen mindestens einmal gebaut', S => S.boatTypes, 5),
+  fb('flTwin','Zwillingswerft',         'Denselben Bootstyp zweimal hintereinander gebaut', S => S.boatRun, 2, 'Wenn es beim ersten Mal so gut geklappt hat, warum nicht gleich nochmal?'),
+  fb('flArche','Arche Noah',            'Von jedem Bootstyp mindestens zwei gebaut', S => S.arche, 2, 'Je zwei von jeder Sorte, so will es die Tradition. Der Regen kann kommen.'),
+  fb('jo3',  'Segelschule',             '3 Jollen gebaut', S => S.bt_jolle, 3, 'Drei Jollen sind genug, um eine eigene Segelschule zu eröffnen.'),
+  fb('jo10', 'Jollen-Regatta',          '10 Jollen gebaut', S => S.bt_jolle, 10, 'Zehn Jollen an der Startlinie. Auf die Plätze, fertig, Wind!'),
+  fb('ku3',  'Fischereiflotte',         '3 Fischkutter gebaut', S => S.bt_kutter, 3, 'Drei Kutter laufen jeden Morgen aus. Der Fischmarkt freut sich.'),
+  fb('ku10', 'Heringskönig',            '10 Fischkutter gebaut', S => S.bt_kutter, 10, 'Jeder Hering zwischen Helgoland und den Lofoten kennt deinen Namen.'),
+  fb('wi3',  'Wikinger-Raubzug',        '3 Wikingerschiffe gebaut', S => S.bt_wikinger, 3, 'Drei Drachenköpfe am Horizont. An der Küste schließen alle die Fensterläden.'),
+  fb('wi10', 'Jarl des Nordens',        '10 Wikingerschiffe gebaut', S => S.bt_wikinger, 10, 'Zehn Langschiffe gehorchen deinem Horn. Walhall reserviert dir einen Platz.'),
+  fb('ko3',  'Hansekaufmann',           '3 Koggen gebaut', S => S.bt_kogge, 3, 'Drei Koggen voller Salz, Tuch und Bernstein. Lübeck lässt grüßen.'),
+  fb('ko10', 'Hansebund',               '10 Koggen gebaut', S => S.bt_kogge, 10, 'Zehn Koggen machen dich zum mächtigsten Händler der Ostsee.'),
+  fb('ga3',  'Schatzflotte',            '3 Galeonen gebaut', S => S.bt_galeone, 3, 'Drei Galeonen, randvoll mit Gold. Jeder Pirat bekommt feuchte Augen.'),
+  fb('ga10', 'Unbesiegbare Armada',     '10 Galeonen gebaut', S => S.bt_galeone, 10, 'Zehn Galeonen mit Blattgold. Diese Armada ist wirklich unbesiegbar.')
+);
+
+// =====================================================================
+// Zwei-Schritt-Rückfrage (Spende, Abfackeln) und die beiden Aktionen
+// =====================================================================
+let twoStepCfg = null, twoStepN = 0;
+function twoStep(cfg){
+  twoStepCfg = cfg; twoStepN = 1; twoStepShow();
+}
+function twoStepShow(){
+  const c = twoStepCfg, s2 = twoStepN === 2;
+  $('donateIcon').textContent = c.icon;
+  $('donateTitle').textContent = s2 ? 'Bist du ganz sicher?' : c.title;
+  $('donateStep').textContent = 'Frage ' + twoStepN + ' von 2';
+  $('donateText').textContent = s2 ? c.text2() : c.text1();
+  $('donateYes').textContent = s2 ? c.yes2 : 'Ja, weiter';
+  $('donateModal').hidden = false; $('donateNo').focus();
+}
+$('donateNo').onclick = () => { const back = twoStepCfg && twoStepCfg.back; twoStepCfg = null; twoStepN = 0; $('donateModal').hidden = true; if (back) $(back).focus(); };
+$('donateYes').onclick = () => {
+  if (!twoStepCfg) return;
+  if (twoStepN === 1){ twoStepN = 2; twoStepShow(); return; }
+  const c = twoStepCfg; twoStepCfg = null; twoStepN = 0; $('donateModal').hidden = true; c.run();
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('donateModal').hidden){ e.stopPropagation(); $('donateNo').click(); } }, {capture: true});
+
+(() => {
+  // ---------- Spende ans Waisenhaus ----------
+  const owned = () => FUN.filter(f => ownN(f.id) > 0).map(f => [f, ownN(f.id)]);
+  const total = () => owned().reduce((a, [, n]) => a + n, 0);
+  const renderDonate = () => {
+    const n = total(), d = wallet.donated || 0;
+    $('donateBtn').disabled = !n;
+    $('donateBtn').textContent = n ? 'Alle ' + n + ' Kuriositäten spenden' : 'Nichts zu spenden';
+    $('donateInfo').textContent = d ? 'Bisher gespendet: ' + d + ' Kuriositäten in ' + (wallet.donations || 1) + (wallet.donations > 1 ? ' Spenden' : ' Spende') + '. Die Kinder danken dir.' : '';
+    $('donateInfo').hidden = !d;
+    const f = wallet.fleet.length;
+    $('burnBtn').hidden = !f;
+    $('burnBtn').textContent = '🔥 ' + (f === 1 ? 'Dein Boot abfackeln' : 'Alle ' + f + ' Boote abfackeln');
+  };
+  const _rs = renderShop; renderShop = () => { _rs(); renderDonate(); };
+  $('donateBtn').onclick = () => twoStep({
+    icon: '🏠', title: 'Alles spenden?', yes2: 'Endgültig spenden', back: 'donateBtn',
+    text1: () => 'Du schenkst dem Waisenhaus Möwennest ' + total() + ' Kuriositäten: ' + owned().map(([f, k]) => (k > 1 ? k + '× ' : '') + f.name).join(', ') + '. Baumaterial, Boote, Muscheln und Serienschutz bleiben bei dir.',
+    text2: () => 'Die Spende kann nicht rückgängig gemacht werden. Alle ' + total() + ' Kuriositäten verlassen dein Schiff für immer' + (wallet.egg ? ', auch das Kraken-Ei, das gerade ausgebrütet wird' : '') + (wallet.treasure ? ', und deine laufende Schatzsuche endet' : '') + '. Im Sammelbuch bleiben sie eingetragen.',
+    run: () => {
+      const list = owned(), n = total(); if (!n) return;
+      list.forEach(([f]) => { wallet.seen[f.id] = 1; });
+      const crew = wallet.crew.length;
+      wallet.fun = {}; wallet.crew = []; wallet.exp = {}; wallet.egg = null; wallet.treasure = null;
+      wallet.donated = (wallet.donated || 0) + n; wallet.donations = (wallet.donations || 0) + 1;
+      undoState = null; saveWallet(); renderShop(); $('toast').hidden = true;
+      showInfo('<span style="font-size:30px">💌</span>', 'Ein Brief aus dem Möwennest', n + ' Kuriositäten gespendet',
+        'Liebe Kapitänin, lieber Kapitän! Heute stand ein Ruderboot voller Schätze vor unserer Tür. ' +
+        (crew ? 'Deine ' + crew + (crew === 1 ? ' Matrose hilft' : ' Matrosen helfen') + ' jetzt beim Dachdecken, ' : '') +
+        'die Kleinen spielen mit allem, was du geschickt hast, und zum ersten Mal seit Langem lachen alle beim Abendessen. Wir werden dich nie vergessen. Deine Kinder vom Möwennest', '');
+    }
+  });
+  // ---------- Flotte abfackeln ----------
+  const fleetTxt = () => BOATS.map(b => [b, harborCount(b.id)]).filter(x => x[1]).map(([b, n]) => (n > 1 ? n + '× ' : '') + b.name).join(', ');
+  $('burnBtn').onclick = () => twoStep({
+    icon: '🔥', title: 'Alle Boote abfackeln?', yes2: 'Endgültig abfackeln', back: 'burnBtn',
+    text1: () => 'Im Hafen liegen ' + wallet.fleet.length + (wallet.fleet.length === 1 ? ' Boot' : ' Boote') + ': ' + fleetTxt() + '. Alle gehen in Flammen auf. Baupläne, Abzeichen und dein angefangenes Boot bleiben.',
+    text2: () => 'Abgefackelt ist abgefackelt, das lässt sich nicht rückgängig machen.' + (wallet.fleet.includes('kogge') ? ' Ohne Kogge nimmt die Hanse keine Aufträge mehr von dir an, bis du eine neue baust.' : ''),
+    run: () => {
+      const n = wallet.fleet.length; if (!n) return;
+      const hadKogge = wallet.fleet.includes('kogge');
+      wallet.fleet = []; wallet.ships = []; shipSel = null; wallet.burned = (wallet.burned || 0) + n;
+      undoState = null; saveWallet(); renderShop(); $('toast').hidden = true;
+      showInfo('<span style="font-size:30px">🔥</span>', 'Der Hafen brennt!', n + (n === 1 ? ' Boot' : ' Boote') + ' abgefackelt',
+        'Die Flammen schlagen bis über die Masten, die Möwen flüchten kreischend. Am Morgen treibt nur noch Asche im Hafenbecken. ' +
+        'Deine Baupläne hast du zum Glück an Land aufbewahrt, du kannst also jederzeit neu bauen.' + (hadKogge ? ' Die Hanse hat deine Aufträge gestrichen, bis wieder eine Kogge im Hafen liegt.' : ''), '');
+    }
+  });
+})();
+
+// =====================================================================
+// Verschleiß: Boote im Hafen altern, Bauteile müssen repariert werden, Schutzlackierung bremst den Verfall
+// =====================================================================
+var DAY_MS = 864e5;
+var SHIP_LIFE = {jolle: 90, kutter: 112, wikinger: 135, kogge: 157, galeone: 180};   // Tage bis zum Zerfall ohne Pflege
+var PART_LIFE = {bemalung: 0.5, segel: 0.7, ruder: 0.8, kiel: 1, rumpf: 1};          // Anteil davon je Bauteil
+var COATS_NEED = {jolle: 1, kutter: 2, wikinger: 3, kogge: 4, galeone: 5};           // Lackschichten für vollen Schutz
+var COAT_DAYS = 90, REPAIR_FROM = 0.3;
+var shipSel = null;
+function newShip(type, at = Date.now()){
+  return {sid: at.toString(36) + Math.floor(Math.random() * 1e4).toString(36), type, born: at, t: at, w: {kiel: 0, rumpf: 0, ruder: 0, segel: 0, bemalung: 0}, coat: null, rep: 0};
+}
+function shipsArr(){
+  if (!wallet.ships){ const now = Date.now(); wallet.ships = wallet.fleet.map((id, i) => newShip(id, now + i)); }
+  return wallet.ships;
+}
+var syncFleet = () => { wallet.fleet = shipsArr().map(s => s.type); };
+// Verschleiß bis jetzt fortschreiben. Während der Lackierung läuft er langsamer (bei vollem Schutz gar nicht).
+function ageShip(s, now){
+  const dt = Math.max(0, now - s.t);
+  if (!dt) return;
+  let eff = dt;
+  if (s.coat){
+    const ov = Math.max(0, Math.min(now, s.coat.until) - Math.max(s.t, s.coat.from));
+    eff -= ov * Math.min(1, s.coat.n / COATS_NEED[s.type]);
+  }
+  const L = SHIP_LIFE[s.type];
+  for (const [p] of PARTS) s.w[p] = Math.min(1, (s.w[p] || 0) + eff / DAY_MS / (L * PART_LIFE[p]));
+  s.t = now;
+  if (s.coat && now >= s.coat.until) s.coat = null;
+}
+var shipDead = s => s.w.kiel >= 1 || s.w.rumpf >= 1;
+function shipsAge(){
+  const now = Date.now(), arr = shipsArr(), lost = [];
+  arr.forEach(s => ageShip(s, now));
+  for (let i = arr.length - 1; i >= 0; i--) if (shipDead(arr[i])){ lost.push(arr[i].type); arr.splice(i, 1); }
+  if (lost.length){ wallet.lostNote = (wallet.lostNote || []).concat(lost); wallet.decayed = (wallet.decayed || 0) + lost.length; }
+  syncFleet(); saveWallet();
+  return lost;
+}
+var repairCost = (s, p) => { const req = BOATS.find(b => b.id === s.type).need[p], c = {}; for (const k in req) c[k] = Math.max(1, Math.ceil(req[k] / 2)); return c; };
+var hasMats = c => Object.keys(c).every(k => (wallet.inv[k] || 0) >= c[k]);
+function shipKeys(){
+  const ks = new Set(), arr = shipsArr();
+  if (arr.length) ks.add('lack');
+  arr.forEach(s => PARTS.forEach(([p]) => { if (s.w[p] >= REPAIR_FROM) Object.keys(repairCost(s, p)).forEach(k => ks.add(k)); }));
+  return ks;
+}
+var pct = w => Math.round((1 - w) * 100);
+var dateTxt = ms => new Date(ms).toLocaleDateString('de-CH', {day: 'numeric', month: 'numeric', year: '2-digit'});
+function shipCond(s){ return Math.min(...PARTS.map(([p]) => 1 - s.w[p])); }
+function daysLeft(s){
+  // grobe Restzeit bis zum Zerfall (Kiel oder Rumpf), ohne weitere Lackierung
+  const L = SHIP_LIFE[s.type];
+  return Math.max(0, Math.round(Math.min((1 - s.w.kiel) * L * PART_LIFE.kiel, (1 - s.w.rumpf) * L * PART_LIFE.rumpf)));
+}
+function renderHarborShips(){
+  const arr = shipsArr(), num = {};
+  if (shipSel && !arr.find(s => s.sid === shipSel)) shipSel = null;
+  const figs = arr.map(s => {
+    const i = BOATS.findIndex(b => b.id === s.type), B = BOATS[i];
+    num[s.type] = (num[s.type] || 0) + 1;
+    const n = harborCount(s.type), c = shipCond(s), built = {};
+    PARTS.forEach(([p]) => built[p] = s.w[p] < 1 ? 1 : 0);
+    const broken = PARTS.filter(([p]) => s.w[p] >= 1).length, cls = c < 0.25 ? 'bad' : c < 0.5 ? 'mid' : 'ok';
+    return '<figure class="ship' + (shipSel === s.sid ? ' sel' : '') + (c < 0.5 ? ' worn' : '') + '" data-ship="' + s.sid + '" tabindex="0" role="button" aria-label="' + B.name + ', Zustand ' + pct(1 - c) + ' Prozent">' +
+      (s.coat ? '<span class="shShield" title="Schutzlack bis ' + dateTxt(s.coat.until) + '">🛡️' + (s.coat.n < COATS_NEED[s.type] ? '<small>' + s.coat.n + '/' + COATS_NEED[s.type] + '</small>' : '') + '</span>' : '') +
+      (broken ? '<span class="shWarn" title="' + broken + ' Bauteil(e) kaputt">⚠️</span>' : '') +
+      boatSVG(i, built, {crop: true}) + '<figcaption>' + B.name + (n > 1 ? ' ' + num[s.type] : '') + '</figcaption>' +
+      '<div class="cond ' + cls + '"><i style="width:' + Math.round(c * 100) + '%"></i></div></figure>';
+  }).join('');
+  return figs + '<div id="shipDetail" class="shipDetail" style="grid-column:1/-1"' + (shipSel ? '' : ' hidden') + '>' + (shipSel ? shipDetailHtml(arr.find(s => s.sid === shipSel)) : '') + '</div>' +
+    '<p class="note left" style="grid-column:1/-1;margin:0">' + arr.length + (arr.length === 1 ? ' Boot' : ' Boote') + ' im Hafen. Tippe ein Boot an, um es zu reparieren oder zu lackieren.</p>';
+}
+function shipDetailHtml(s){
+  const B = BOATS.find(b => b.id === s.type), need = COATS_NEED[s.type], lack = wallet.inv.lack || 0;
+  const rows = PARTS.map(([p, pn]) => {
+    const w = s.w[p], c = repairCost(s, p), ok = hasMats(c), can = w >= REPAIR_FROM;
+    const chips = Object.keys(c).map(k => '<span class="needChip' + ((wallet.inv[k] || 0) >= c[k] ? ' ok' : '') + '">' + MATS[k].icon + ' ' + Math.min(wallet.inv[k] || 0, c[k]) + '/' + c[k] + ' ' + MATS[k].name + '</span>').join('');
+    return '<li><div class="spTop"><span class="pn">' + pn + '</span><span class="spPct ' + (w >= 1 ? 'bad' : w >= 0.5 ? 'mid' : '') + '">' + (w >= 1 ? 'kaputt' : 'Zustand ' + pct(w) + ' %') + '</span></div>' +
+      '<div class="cond ' + (w >= 0.75 ? 'bad' : w >= 0.5 ? 'mid' : 'ok') + '"><i style="width:' + pct(w) + '%"></i></div>' +
+      (can ? '<div class="spRow"><div class="need">' + chips + '</div><button type="button" class="spBtn" data-repair="' + s.sid + ':' + p + '"' + (ok ? '' : ' disabled') + '>Reparieren</button></div>' : '<span class="sb">In gutem Zustand</span>') + '</li>';
+  }).join('');
+  const coatTxt = s.coat ? 'Schutzlack: ' + s.coat.n + ' von ' + need + ' Schichten bis ' + dateTxt(s.coat.until) + (s.coat.n < need ? ' · bremst den Verfall um ' + Math.round(s.coat.n / need * 100) + ' %' : ' · voll geschützt') : 'Kein Schutzlack. ' + B.name + ' braucht ' + need + (need === 1 ? ' Schicht' : ' Schichten') + ' für vollen Schutz.';
+  const full = s.coat && s.coat.n >= need;
+  return '<div class="sdHead"><b>' + B.name + '</b><span class="sb">gebaut am ' + dateTxt(s.born) + (s.rep ? ' · ' + s.rep + '× repariert' : '') + ' · zerfällt ohne Pflege in etwa ' + daysLeft(s) + ' Tagen</span></div>' +
+    '<ol class="shipParts">' + rows + '</ol>' +
+    '<div class="sdCoat"><span>🛡️ ' + coatTxt + '</span><button type="button" class="primary" data-coat="' + s.sid + '"' + (full || (!lack && wallet.pearls < 1) ? ' disabled' : '') + '>' +
+    (full ? 'Voll geschützt' : lack ? 'Lack auftragen (' + lack + ' im Lager)' : 'Lack kaufen und auftragen ' + '<span class="price">' + PEARL_SVG + '1</span>') + '</button></div>' +
+    '<p class="note left" style="margin:0">Ab ' + Math.round(REPAIR_FROM * 100) + ' % Verschleiß kannst du ein Bauteil reparieren, das kostet die Hälfte seines Baumaterials. Sind Kiel oder Rumpf ganz verrottet, zerfällt das Boot. Eine Lackierung hält 3 Monate ab der ersten Schicht.</p>';
+}
+$('harborSec').addEventListener('click', e => {
+  const r = e.target.closest('[data-repair]'), c = e.target.closest('[data-coat]'), f = e.target.closest('[data-ship]');
+  if (r && !r.disabled){
+    const [sid, p] = r.dataset.repair.split(':'), s = shipsArr().find(x => x.sid === sid); if (!s) return;
+    const cost = repairCost(s, p); if (!hasMats(cost)) return;
+    deal(() => { ageShip(s, Date.now()); for (const k in cost) wallet.inv[k] -= cost[k]; s.w[p] = 0; s.rep = (s.rep || 0) + 1; });
+    toast(PARTS.find(x => x[0] === p)[1] + ' repariert', true);
+  } else if (c && !c.disabled){
+    const s = shipsArr().find(x => x.sid === c.dataset.coat); if (!s) return;
+    deal(() => {
+      if ((wallet.inv.lack || 0) < 1){ if (wallet.pearls < 1) return false; wallet.pearls -= 1; wallet.inv.lack = (wallet.inv.lack || 0) + 1; }
+      const now = Date.now(); ageShip(s, now);
+      wallet.inv.lack -= 1;
+      if (!s.coat) s.coat = {from: now, until: now + COAT_DAYS * DAY_MS, n: 1}; else s.coat.n++;
+    });
+    toast('Schutzlack aufgetragen (' + s.coat.n + ' von ' + COATS_NEED[s.type] + ')', true);
+  } else if (f){
+    shipSel = shipSel === f.dataset.ship ? null : f.dataset.ship; renderShop();
+    const d = $('shipDetail'); if (d && !d.hidden) d.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  }
+});
+$('harborSec').addEventListener('keydown', e => { const f = e.target.closest('[data-ship]'); if (f && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); f.click(); } });
+// Beim Öffnen der Werft altern lassen und Verluste melden
+const _rsWear = renderShop;
+renderShop = () => {
+  shipsAge();
+  _rsWear();
+  setTimeout(showLost, 60);
+};
+function showLost(){
+  if (wallet.lostNote && wallet.lostNote.length && $('helpModal').hidden && !$('shopSheet').hidden){
+    const L = wallet.lostNote; wallet.lostNote = []; saveWallet();
+    const names = L.map(id => BOATS.find(b => b.id === id).name);
+    showInfo('<span style="font-size:30px">🪵</span>', names.length === 1 ? names[0] + ' zerfallen' : names.length + ' Boote zerfallen', 'Kiel oder Rumpf waren verrottet',
+      (names.length === 1 ? 'Deine ' + names[0] + ' ist' : 'Deine Boote (' + names.join(', ') + ') sind') + ' im Hafen auseinandergefallen. Repariere Kiel und Rumpf rechtzeitig oder schütze deine Boote mit Schutzlack. Den Bauplan hast du noch, du kannst jederzeit neu bauen.' +
+      (L.includes('kogge') && !wallet.fleet.includes('kogge') ? ' Ohne Kogge im Hafen pausieren die Hanse-Aufträge.' : ''), '');
+  }
+}
+const _hanseOpenW = hanseOpen;
+hanseOpen = () => { try{ shipsAge(); }catch(_){} return _hanseOpenW(); };
+shipsAge();
 
 // =====================================================================
 // Neue Ordnung: Leiste unten (Rudern, Training, Logbuch, Erfolge), Einstellungen oben rechts

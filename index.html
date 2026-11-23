@@ -569,6 +569,16 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 .modeScreen .steadyGauge{margin-bottom:22px}
 .bossBar.steady{border-color:var(--ok)}
 .bossBar.steady .bbMain b{color:var(--ok)}
+.mbDots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.mbDots i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--muted);opacity:.7}
+.mbDots i.ok{background:var(--ok);border-color:var(--ok);opacity:1}
+.mbDots i.no{background:var(--warn);border-color:var(--warn);opacity:1}
+.mbDots i.now{border-color:var(--fg);opacity:1;animation:mbPulse 1s ease-in-out infinite}
+@keyframes mbPulse{50%{transform:scale(1.35)}}
+.missionBar.onTarget{border-color:var(--ok)}
+.missionBar.onTarget .mbSub{color:var(--ok)}
+.missionBar.below .mbSub{color:var(--warn)}
+.modeScreen .mbDots i{width:14px;height:14px}
 /* Neue Ordnung */
 :root{--navH:64px}
 .app{padding-bottom:calc(var(--navH) + 10px + env(safe-area-inset-bottom,0px))}
@@ -800,7 +810,7 @@ button.danger{color:var(--warn);border-color:var(--warn)}
 
     <section data-tab="game" hidden>
       <h3>Kaperfahrten</h3>
-      <p class="note left">Geführte Intervalle: Die App sagt dir mit Pfiff und Vibration, wann es losgeht und wann du dich erholen darfst. Mit jedem Rang wird eine neue Fahrt frei.</p>
+      <p class="note left">Geführte Intervalle: Die App sagt dir mit Pfiff und Vibration, wann es losgeht und wann du dich erholen darfst. Aus den 3 Minuten Aufwärmen ermittelt sie deine Basisleistung. In jeder harten Phase musst du im Schnitt ein Ziel darüber schaffen (z. B. +35 %), die ersten Sekunden zum Antreten zählen nicht. Jede geschaffte Phase ist „erobert“. Die Beute richtet sich nach dem Anteil eroberter Phasen, alle erobert gibt +25 %. Ab 60 % gilt die Fahrt als geschafft. Mit jedem Rang wird eine neue Fahrt frei.</p>
       <div class="shopList" id="missionList"></div>
     </section>
 
@@ -1784,7 +1794,7 @@ function onRowerData(e){
 // Jeder Bluetooth-Schritt bekommt eine Frist. Ohne sie bleibt die App für immer bei „Verbinde …“ hängen,
 // wenn das Gerät nicht antwortet (z. B. weil schon eine Uhr oder eine andere App damit verbunden ist).
 let gattStep = '';
-const APP_VERSION = '22.11.2026 g';
+const APP_VERSION = '23.11.2026 d';
 // Verbindungsablauf wird immer mitgeschrieben (auch ohne eingeschaltetes Protokoll), damit man sieht, wo es hängt
 const connLog = [];
 function connNote(text){
@@ -3403,14 +3413,18 @@ function ghostMetric(myDist){
 // ---------- Kaperfahrten (geführte Intervalle) ----------
 const MISSIONS = [
   {id: 'handel', name: 'Handelsschiff in Sicht', rank: 0, loot: 40, story: 'Ein schwer beladenes Handelsschiff! Hol es mit fünf Sprints ein.',
-   sets: [5, [['Sprint', 60, 1], ['Erholen', 60, 0]]]},
+   sets: [5, [['Sprint', 60, 1, 1.35], ['Erholen', 60, 0]]]},
   {id: 'marine', name: 'Flucht vor der Marine', rank: 1, loot: 50, story: 'Die Marine ist dir auf den Fersen. Vier lange Fluchtphasen!',
-   sets: [4, [['Flucht', 120, 1], ['Verstecken', 60, 0]]]},
-  {id: 'pyramide', name: 'Pyramide der Piraten', rank: 2, loot: 60, story: 'Eins, zwei, drei Minuten Vollgas und wieder zurück. Wer oben ankommt, ist ein echter Pirat.',
-   list: [['Angriff', 60, 1], ['Erholen', 60, 0], ['Angriff', 120, 1], ['Erholen', 60, 0], ['Angriff', 180, 1], ['Erholen', 60, 0], ['Angriff', 120, 1], ['Erholen', 60, 0], ['Angriff', 60, 1]]},
+   sets: [4, [['Flucht', 120, 1, 1.2], ['Verstecken', 60, 0]]]},
+  {id: 'pyramide', name: 'Pyramide der Piraten', rank: 2, loot: 60, story: 'Sieben Angriffe zu je einer Minute: erst runter bis +15 %, dann wieder hinauf bis +35 %. Wer oben ankommt, ist ein echter Pirat.',
+   list: [['Angriff', 60, 1, 1.35], ['Erholen', 120, 0], ['Angriff', 60, 1, 1.25], ['Erholen', 60, 0], ['Angriff', 60, 1, 1.2], ['Erholen', 60, 0], ['Angriff', 60, 1, 1.15], ['Erholen', 60, 0], ['Angriff', 60, 1, 1.2], ['Erholen', 60, 0], ['Angriff', 60, 1, 1.25], ['Erholen', 120, 0], ['Angriff', 60, 1, 1.35]]},
   {id: 'sturm', name: 'Sturmfahrt', rank: 4, loot: 70, story: 'Welle um Welle bricht über das Deck. Zwölf kurze, harte Schläge gegen den Sturm.',
-   sets: [12, [['Welle', 20, 1], ['Durchatmen', 40, 0]]]}
+   sets: [12, [['Welle', 20, 1, 1.5], ['Durchatmen', 40, 0]]]}
 ];
+function missionGoalTxt(M){
+  const f = [...new Set(missionPhases(M).filter(p => p[2] === 1).map(p => Math.round((p[3] - 1) * 100)))].sort((a, b) => a - b);
+  return '+' + (f.length > 1 ? f[0] + ' bis +' + f[f.length - 1] : f[0]) + ' % über deiner Aufwärm-Leistung';
+}
 function missionPhases(M){
   const core = M.list || Array.from({length: M.sets[0]}, () => M.sets[1]).flat();
   return [['Aufwärmen', 180, -1], ...core, ['Ausrudern', 120, -1]];
@@ -3434,14 +3448,49 @@ function missionState(){
   const hardIdx = P.slice(0, i + 1).filter(p => p[2] === 1).length;
   return {M, P, i, el, left: i < P.length ? acc + P[i][1] - el : 0, frac: i < P.length ? (el - acc) / P[i][1] : 1, hardTotal, hardIdx, total: missionTotal(M)};
 }
+// Leistungsprüfung: Aus dem Aufwärmen (ab Minute 1) ermittelt die App deine Basisleistung. Jede harte Phase hat ein Ziel
+// als Vielfaches davon. Gewertet wird dein Schnitt über die Phase; die ersten Sekunden zum Antreten zählen nicht.
+const MISSION_RAMP = p => p[1] <= 30 ? 2 : 4;
+const MISSION_PASS = 0.6;                                        // ab 60 % eroberter Phasen gilt die Fahrt als geschafft
+function missionTarget(p){ const A = activeMission; return A && A.base && p[3] ? Math.round(A.base * p[3]) : null; }
 function missionStep(){
   const st = missionState(); if (!st) return;
-  if (st.i >= st.P.length){
-    if (!activeMission.done){ activeMission.done = true; s.missionDone = activeMission.id; fanfare(); buzz([120, 80, 120]); msg('Kaperfahrt geschafft! Beende und speichere die Einheit, um die Beute einzustreichen.'); }
-  } else if (st.i !== activeMission.last){
-    if (activeMission.last >= 0){ whistle(); buzz(st.P[st.i][2] === 1 ? 300 : 120); }
-    else msg('Kaperfahrt läuft. Folge den Kommandos oben.');
-    activeMission.last = st.i;
+  const A = activeMission, E = s.energyJ || 0, el = st.el;
+  if (!A.res) A.res = [];
+  // Basis aus dem Aufwärmen
+  if (st.i === 0 && el >= 60 && A.wE == null){ A.wE = E; A.wT = el; }
+  if (st.i > 0 && A.base == null){
+    A.base = Math.max(50, A.wE != null && el - A.wT > 20 ? (E - A.wE) / (el - A.wT) : E / Math.max(1, el));
+    msg('Basis aus dem Aufwärmen: ' + Math.round(A.base) + ' W. In den harten Phasen musst du darüber liegen, das Ziel steht oben.');
+  }
+  // laufende harte Phase messen
+  const acc = st.P.slice(0, st.i).reduce((a, p) => a + p[1], 0);
+  const cur = st.P[st.i];
+  if (cur && cur[2] === 1){
+    if (!A.ph || A.ph.i !== st.i) A.ph = {i: st.i, E: null, t: null, avg: null};
+    if (A.ph.E == null && el - acc >= MISSION_RAMP(cur)){ A.ph.E = E; A.ph.t = el; }
+    if (A.ph.E != null && el - A.ph.t >= 1) A.ph.avg = (E - A.ph.E) / (el - A.ph.t);
+  }
+  if (st.i !== A.last){
+    // vorige harte Phase auswerten
+    const prev = A.last >= 0 ? st.P[A.last] : null;
+    if (prev && prev[2] === 1 && A.ph && A.ph.i === A.last){
+      const need = missionTarget(prev), avg = A.ph.avg ?? 0, ok = !need || avg >= need;
+      A.res.push({ok, avg: Math.round(avg), need});
+      const hits = A.res.filter(r => r.ok).length;
+      if (ok){ blockSound(); buzz([90, 50, 90]); msg(prev[0] + ' erobert! Ø ' + Math.round(avg) + ' W (Ziel ' + need + ' W) · ' + hits + ' von ' + A.res.length + ' geschafft'); }
+      else { failSound(); buzz(500); msg(prev[0] + ' verfehlt: Ø ' + Math.round(avg) + ' von ' + need + ' W · ' + hits + ' von ' + A.res.length + ' geschafft'); }
+    } else if (A.last >= 0){ whistle(); buzz(cur && cur[2] === 1 ? 300 : 120); }
+    else msg('Kaperfahrt läuft. Wärm dich 3 Minuten locker auf, daraus ermittelt die App deine Basis.');
+    if (prev && prev[2] === 1 && cur){ setTimeout(whistle, 700); }
+    A.last = st.i;
+  }
+  if (st.i >= st.P.length && !A.done){
+    A.done = true;
+    const n = st.hardTotal, h = A.res.filter(r => r.ok).length;
+    s.missionDone = A.id; s.missionRes = {h, n, base: Math.round(A.base || 0)};
+    if (h / n >= MISSION_PASS){ fanfare(); buzz([120, 80, 120]); msg((h === n ? 'Volle Ladung! Alle ' + n + ' Phasen erobert.' : h + ' von ' + n + ' Phasen erobert, Fahrt geschafft!') + ' Beende und speichere die Einheit, um die Beute einzustreichen.'); }
+    else { failSound(); msg('Nur ' + h + ' von ' + n + ' Phasen erobert. Ein Teil der Beute gehört trotzdem dir: speichern nicht vergessen.'); }
   }
   renderMissionBar(st);
 }
@@ -3449,16 +3498,31 @@ function renderMissionBar(st = missionState()){
   const bar = $('missionBar');
   if (!st){ bar.hidden = true; return; }
   bar.hidden = false;
+  const A = activeMission, res = (A && A.res) || [], hits = res.filter(r => r.ok).length;
+  const dots = '<span class="mbDots" aria-label="' + hits + ' von ' + st.hardTotal + ' erobert">' + Array.from({length: st.hardTotal}, (_, k) => '<i class="' + (k < res.length ? (res[k].ok ? 'ok' : 'no') : k === res.length && st.P[st.i] && st.P[st.i][2] === 1 ? 'now' : '') + '"></i>').join('') + '</span>';
   if (st.i >= st.P.length){
-    bar.className = 'missionBar won';
-    bar.innerHTML = '<div class="mbMain"><span class="label">' + esc(st.M.name) + '</span><b>Beute gesichert!</b><span class="mbSub">Beende und speichere die Einheit, um sie einzustreichen.</span></div>' +
+    const R = s.missionRes || {h: hits, n: st.hardTotal}, pass = R.h / R.n >= MISSION_PASS;
+    bar.className = 'missionBar ' + (pass ? 'won' : 'calm');
+    bar.innerHTML = '<div class="mbMain"><span class="label">' + esc(st.M.name) + '</span><b>' + (R.h === R.n ? 'Volle Ladung!' : pass ? 'Beute gesichert!' : 'Magere Beute') + '</b>' + dots +
+      '<span class="mbSub">' + R.h + ' von ' + R.n + ' Phasen erobert. Beende und speichere die Einheit, um die Beute einzustreichen.</span></div>' +
       '<button type="button" id="mbStop">Schließen</button>';
   } else {
     const p = st.P[st.i], kind = p[2] === 1 ? 'hard' : p[2] === 0 ? 'easy' : 'calm';
-    bar.className = 'missionBar ' + kind;
+    let sub, state = '';
+    if (p[2] === 1){
+      const need = missionTarget(p), ph = A.ph && A.ph.i === st.i ? A.ph : null, avg = ph && ph.avg != null ? Math.round(ph.avg) : null;
+      if (!need) sub = 'Gib alles!';
+      else if (avg == null) sub = 'Ziel ≥ ' + need + ' W · Antreten …';
+      else { state = avg >= need ? ' onTarget' : ' below'; sub = 'Ziel ≥ ' + need + ' W · dein Ø ' + avg + ' W ' + (avg >= need ? '✓' : '↑'); }
+    } else if (st.i === 0) sub = 'Locker einrudern. Daraus ergibt sich deine Basis' + (A.wE != null && st.el - A.wT > 5 ? ' (bisher ' + Math.round(((s.energyJ || 0) - A.wE) / (st.el - A.wT)) + ' W)' : '') + '.';
+    else {
+      const nx = st.P[st.i + 1], need = nx ? missionTarget(nx) : null;
+      sub = nx ? 'Danach: ' + nx[0] + ' ' + fmtTime(nx[1]) + (need ? ' · Ziel ≥ ' + need + ' W' : '') : 'Gleich geschafft!';
+    }
+    bar.className = 'missionBar ' + kind + state;
     bar.innerHTML = '<div class="mbMain"><span class="label">' + esc(st.M.name) + (p[2] === 1 ? ' · ' + st.hardIdx + ' von ' + st.hardTotal : '') + '</span>' +
-      '<b>' + p[0] + ' <span class="mbT">' + fmtTime(Math.ceil(st.left)) + '</span></b>' +
-      '<span class="mbSub">' + (st.i + 1 < st.P.length ? 'Danach: ' + st.P[st.i + 1][0] + ' ' + fmtTime(st.P[st.i + 1][1]) : 'Gleich geschafft!') + '</span>' +
+      '<b>' + p[0] + ' <span class="mbT">' + fmtTime(Math.ceil(st.left)) + '</span></b>' + dots +
+      '<span class="mbSub">' + sub + '</span>' +
       '<div class="bar"><i style="width:' + Math.round(st.frac * 100) + '%"></i></div></div>' +
       '<button type="button" id="mbStop">Abbrechen</button>';
   }
@@ -3499,7 +3563,7 @@ function extraSnap(){
   const out = {};
   if (s.tact && s.tact.inRange) out.tact = {n: s.tact.inRange, best: s.tact.best, pts: s.tact.points};
   if (s.trace){ const b = {}; HALL.forEach(D => { const v = fastestWindow(s.trace, D); if (v) b[D] = v; }); if (Object.keys(b).length) out.best = b; }
-  if (s.missionDone) out.mission = s.missionDone;
+  if (s.missionDone){ out.mission = s.missionDone; if (s.missionRes) out.missionRes = s.missionRes; }
   return out;
 }
 
@@ -3814,11 +3878,15 @@ function extraRewards(x, before, R){
   }
   // Kaperfahrt
   if (x.mission){
-    const M = MISSIONS.find(m => m.id === x.mission);
-    add(Math.round(M.loot * (w.id === 'piraten' ? 1.5 : 1)), (w.id === 'piraten' ? '🏴‍☠️ ' : '') + 'Kaperfahrt „' + M.name + '“' + (w.id === 'piraten' ? ' (Piratenwetter +50 %)' : ''));
+    const M = MISSIONS.find(m => m.id === x.mission), MR = x.missionRes;
+    // Beute nach Leistung: Anteil eroberter Phasen, volle Ladung +25 %. Ältere Fahrten ohne Messung: volle Beute.
+    const share = MR ? MR.h / MR.n : 1, full = MR && MR.h === MR.n, pass = share >= MISSION_PASS;
+    add(Math.round(M.loot * share * (full ? 1.25 : 1) * (w.id === 'piraten' ? 1.5 : 1)), (w.id === 'piraten' ? '🏴‍☠️ ' : '') + 'Kaperfahrt „' + M.name + '“' + (MR ? ': ' + MR.h + ' von ' + MR.n + ' Phasen erobert' + (full ? ', volle Ladung +25 %' : '') : '') + (w.id === 'piraten' ? ' (Piratenwetter +50 %)' : ''));
     wallet.missions = wallet.missions || {};
-    if (!wallet.missions[M.id]){ R.pearls++; R.lines.push(['P', 'Erste Kaperfahrt „' + M.name + '“']); }
-    wallet.missions[M.id] = (wallet.missions[M.id] || 0) + 1;
+    if (pass){
+      if (!wallet.missions[M.id]){ R.pearls++; R.lines.push(['P', 'Erste Kaperfahrt „' + M.name + '“']); }
+      wallet.missions[M.id] = (wallet.missions[M.id] || 0) + 1;
+    }
     if (activeMission && activeMission.id === M.id && activeMission.done) activeMission = null;
   }
   // Ruhmeshalle
@@ -3915,7 +3983,7 @@ function renderTraining(){
     const locked = r.i < M.rank, running = activeMission && activeMission.id === M.id, n = (wallet.missions || {})[M.id] || 0;
     const mins = Math.round(missionTotal(M) / 60);
     return '<div class="shopRow"><span class="ic" aria-hidden="true">' + (locked ? '🔒' : '🏴‍☠️') + '</span><div><span class="nm">' + M.name + '</span><span class="sb">' + M.story +
-      ' · ' + mins + ' min · Beute ' + M.loot + ' Muscheln' + (n ? ' · ' + n + '× geschafft' : ' · erste Fahrt: +1 Perlmuschel') +
+      ' · ' + mins + ' min · bis ' + Math.round(M.loot * 1.25) + ' Muscheln · Ziel ' + missionGoalTxt(M) + (n ? ' · ' + n + '× geschafft' : ' · erste Fahrt: +1 Perlmuschel') +
       (locked ? ' · <b class="st">ab Rang ' + RANKS[M.rank][0] + '</b>' : '') + '</span></div>' +
       '<button type="button" data-mission="' + M.id + '"' + (locked ? ' disabled' : '') + '>' + (running ? 'Läuft' : 'Starten') + '</button></div>';
   }).join('');
